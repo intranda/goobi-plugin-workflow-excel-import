@@ -23,7 +23,6 @@ import org.goobi.production.plugin.interfaces.IValidatorPlugin;
 import de.sub.goobi.forms.SessionForm;
 import de.sub.goobi.helper.Helper;
 import de.sub.goobi.helper.HelperSchritte;
-import de.sub.goobi.helper.NIOFileUtils;
 import de.sub.goobi.helper.StorageProvider;
 import de.sub.goobi.persistence.managers.StepManager;
 
@@ -140,7 +139,7 @@ public class GoobiScriptCopyImages extends AbstractIGoobiScript implements IGoob
          */
         private boolean isLastFileOfProcess(MassUploadedFile muf) {
             for (MassUploadedFile m : uploadedFiles) {
-                if (m.getProcessTitle() != null && m.getProcessTitle().equals(muf.getProcessTitle()) && m.isTransfered()==false) {
+                if (m.getProcessTitle() != null && m.getProcessTitle().equals(muf.getProcessTitle()) && !m.isTransfered()) {
                     return false;
                 }
             }
