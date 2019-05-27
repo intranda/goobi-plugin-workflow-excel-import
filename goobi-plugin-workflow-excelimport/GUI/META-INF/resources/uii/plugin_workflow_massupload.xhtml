@@ -1,0 +1,185 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://xmlns.jcp.org/jsf/facelets" xmlns:composite="http://xmlns.jcp.org/jsf/composite" xmlns:h="http://xmlns.jcp.org/jsf/html" xmlns:f="http://xmlns.jcp.org/jsf/core" xmlns:x="http://myfaces.apache.org/tomahawk" xmlns:intranda="http://xmlns.jcp.org/jsf/composite/composites" xmlns:pt="http://xmlns.jcp.org/jsf/passthrough" xmlns:p="http://primefaces.org/ui">
+
+    <composite:interface>
+    </composite:interface>
+
+    <composite:implementation>
+
+		 <style>
+			#upload .ui-widget-content {
+				border: none;
+			}
+			
+			#upload .ui-widget-header {
+			    background: #fff none repeat scroll 0 0;
+			}
+			
+			#upload .ui-fileupload-choose {
+			    background: #368ee0 none repeat scroll 0 0;
+			    color: #fff;
+			    text-shadow: none;
+			    border: 0 none;
+			    padding: 0.3em 1em;
+			    font-weight: 400;
+			}
+			
+			#upload .ui-fileupload-buttonbar span.ui-button .ui-button-text {
+			    padding: 0.3em 1em;
+			}
+			
+			#upload .ui-fileupload-buttonbar span.ui-button span.ui-button-icon-left {
+			    display: none;
+			}
+			
+			#upload .ui-fileupload-files {
+			    width: 100%;
+			}
+			
+			.ui-fileupload-content .ui-progressbar {
+			    width: 100px;
+			    height: 20px;
+			    margin: 0px;
+			}
+
+			#upload .ui-fileupload-files td:first-child {
+			    display: none;
+			}
+			
+			.draganddroparea {
+				border: 2px dashed silver;
+				padding-top:20px;
+				
+			}
+		</style>
+
+        <h:outputText styleClass="alert alert-danger block margin-top-most" value="#{msgs.noAccessAllowed} Plugin_Goobi_Massupload" 
+        	rendered="#{!LoginForm.hasRole('Plugin_Goobi_Massupload')}"/>
+        
+        <h:panelGroup rendered="#{LoginForm.hasRole('Plugin_Goobi_Massupload')}">
+			<div class="row">
+				<div class="col-sm-12">
+					<div class="box box-color box-bordered lightgrey">
+						<div class="box-title">
+							<h3>
+								<i class="fa fa-plug"></i>
+								<h:outputText value="#{msgs[NavigationForm.workflowPlugin.title]}" />
+							</h3>
+						</div>
+						<div class="box-content">
+							<div class="row" style="padding:15px;">
+							
+							<!-- Upload area -->
+							<div class="col-sm-6" >
+								<div class="draganddroparea" >
+									<h:form id="uploadform" prependId="false"  >
+									 	<p:fileUpload fileUploadListener="#{NavigationForm.workflowPlugin.uploadFile}" id="upload" auto="true"
+											style="text-align:center;" mode="advanced" multiple="true" dragDropSupport="true"
+											label="#{msgs.plugin_massupload_selectFiles}" sizeLimit="1000000000000"
+											allowTypes="#{NavigationForm.workflowPlugin.allowedTypes}" 
+											oncomplete="if(this.files.length == 0) sortFiles()" 
+											update=":actionform"/>
+									</h:form>
+								</div>
+								<h:form>
+									<h:commandLink title="#{msgs.plugin_massupload_use_home_directory}" 
+										action="#{NavigationForm.workflowPlugin.readFilesFromUserHomeFolder}"
+										styleClass="pull-right font-light margin-top-regular">
+										
+										<h:outputText value="#{msgs.plugin_massupload_use_home_directory}" />
+									</h:commandLink>
+								</h:form>
+							</div>
+							<div class="col-sm-6">
+								<h:form id="actionarea">
+									<p:remoteCommand name="sortFiles" actionListener="#{NavigationForm.workflowPlugin.sortFiles}" update="actionarea, :actionform"/>
+    
+									<h:panelGroup rendered="#{NavigationForm.workflowPlugin.uploadedFiles.size() > 0}">
+										<h:commandLink title="#{msgs.plugin_massupload_startInserting}" 
+											action="#{NavigationForm.workflowPlugin.startInserting}"
+											styleClass="btn btn-green font-size-s margin-top-most pull-right">
+											<i class="fa fa-cog margin-right-5"/>
+											<h:outputText value="#{msgs.plugin_massupload_startInserting}" />
+										</h:commandLink>
+										
+										<h:commandLink title="#{msgs.abbrechen}" 
+											action="#{NavigationForm.workflowPlugin.cleanUploadFolder}"
+											styleClass="btn font-size-s margin-top-most margin-right-5 pull-right">
+											<i class="fa fa-trash margin-right-5"/>
+											<h:outputText value="#{msgs.abbrechen}" />
+										</h:commandLink>
+										
+									</h:panelGroup>
+								</h:form>
+							</div>
+							</div>
+							<!--  list of all uploaded files with action buttons -->
+							<h:panelGroup id="actionform"  styleClass="col-sm-12">
+							<div class="row">
+							
+								<h:form rendered="#{NavigationForm.workflowPlugin.uploadedFiles.size() > 0}">
+										<hr style="margin-top:#{NavigationForm.workflowPlugin.finishedInserts.size() > 0?'20px':'20px'};"/>
+									
+									
+										<h:dataTable var="item" value="#{NavigationForm.workflowPlugin.uploadedFiles}" id="files"
+											styleClass="table table-hover table-nomargin dataTable table-bordered responsive"
+											style="border-right: 1px solid #ddd;">
+											
+											<h:column>
+												<f:facet name="header">
+													<h:outputText value="#{msgs.datei}" />
+												</f:facet>
+												<h:outputText value="#{item.filename}" title="#{item.file.absolutePath}" />
+											</h:column>
+											
+											<h:column>
+												<f:facet name="header">
+													<h:outputText value="#{msgs.prozess}" />
+												</f:facet>
+												<h:outputText value="#{item.processTitle == null or item.processTitle eq ''?'-':item.processTitle}" title="#{item.processFolder}" />
+											</h:column>
+											
+											<h:column>
+												<f:facet name="header">
+													<h:outputText value="#{msgs.prozesseID}" />
+												</f:facet>
+												<h:outputText value="#{item.processId eq '0'?'-':item.processId}" />
+											</h:column>
+											
+											<h:column>
+												<f:facet name="header">
+													<h:outputText value="#{msgs.arbeitsschritt}" />
+												</f:facet>
+												<h:outputText value="#{item.stepId eq '0'?'-':item.stepId}" />
+											</h:column>
+											
+											<h:column>
+												<f:facet name="header">
+													<h:outputText value="#{msgs.status}" />
+												</f:facet>
+												<h:outputText value="#{item.status}" title="#{item.statusmessage}" styleClass="badge font-size-xs #{item.status == 'OK' ? 'badge-intranda-green' : file.status == 'UNKNOWN'?'badge-intranda-orange':'badge-intranda-red'}" />
+											</h:column>
+											
+											<h:column>
+												<f:facet name="header">
+													<h:outputText value="#{msgs.description}" />
+												</f:facet>
+												<h:outputText value="#{item.statusmessage}"/>
+											</h:column>
+											
+										</h:dataTable>
+									
+									
+									
+								</h:form>
+								</div>
+							</h:panelGroup>
+							
+						</div>
+					</div>
+				</div>
+			</div>
+        </h:panelGroup>
+
+    </composite:implementation>
+
+</ui:composition>
