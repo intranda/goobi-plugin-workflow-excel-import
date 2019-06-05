@@ -50,6 +50,10 @@
 				padding-top:20px;
 				
 			}
+			
+			.infofield{
+			border-right: 6px solid green
+			}
 		</style>
 
         <h:outputText styleClass="alert alert-danger block margin-top-most" value="#{msgs.noAccessAllowed} Plugin_Goobi_Massupload" 
@@ -66,53 +70,164 @@
 							</h3>
 						</div>
 						<div class="box-content">
-							<div class="row" style="padding:15px;">
+							<!-- <div class="row" style="padding:15px;">
 							
-							<!-- Upload area -->
-							<div class="col-sm-6" >
-								<div class="draganddroparea" >
-									<h:form id="uploadform" prependId="false"  >
-									 	<p:fileUpload fileUploadListener="#{NavigationForm.workflowPlugin.uploadFile}" id="upload" auto="true"
-											style="text-align:center;" mode="advanced" multiple="true" dragDropSupport="true"
-											label="#{msgs.plugin_massupload_selectFiles}" sizeLimit="1000000000000"
-											allowTypes="#{NavigationForm.workflowPlugin.allowedTypes}" 
-											oncomplete="if(this.files.length == 0) sortFiles()" 
-											update=":actionform"/>
+							Upload area
+								<div class="col-sm-6" >
+									<div class="draganddroparea" >
+										<h:form id="uploadform" prependId="false"  >
+										 	<p:fileUpload fileUploadListener="#{NavigationForm.workflowPlugin.uploadFile}" id="upload" auto="true"
+												style="text-align:center;" mode="advanced" multiple="true" dragDropSupport="true"
+												label="#{msgs.plugin_massupload_selectFiles}" sizeLimit="1000000000000"
+												allowTypes="#{NavigationForm.workflowPlugin.allowedTypes}" 
+												oncomplete="if(this.files.length == 0) sortFiles()" 
+												update=":actionform"/>
+										</h:form>
+									</div>
+									<h:form>
+										<h:commandLink title="#{msgs.plugin_massupload_use_home_directory}" 
+											action="#{NavigationForm.workflowPlugin.readFilesFromUserHomeFolder}"
+											styleClass="pull-right font-light margin-top-regular">
+											
+											<h:outputText value="#{msgs.plugin_massupload_use_home_directory}" />
+										</h:commandLink>
 									</h:form>
 								</div>
-								<h:form>
-									<h:commandLink title="#{msgs.plugin_massupload_use_home_directory}" 
-										action="#{NavigationForm.workflowPlugin.readFilesFromUserHomeFolder}"
-										styleClass="pull-right font-light margin-top-regular">
-										
-										<h:outputText value="#{msgs.plugin_massupload_use_home_directory}" />
-									</h:commandLink>
-								</h:form>
-							</div>
-							<div class="col-sm-6">
-								<h:form id="actionarea">
-									<p:remoteCommand name="sortFiles" actionListener="#{NavigationForm.workflowPlugin.sortFiles}" update="actionarea, :actionform"/>
-    
-									<h:panelGroup rendered="#{NavigationForm.workflowPlugin.uploadedFiles.size() > 0}">
-										<h:commandLink title="#{msgs.plugin_massupload_startInserting}" 
-											action="#{NavigationForm.workflowPlugin.startInserting}"
-											styleClass="btn btn-green font-size-s margin-top-most pull-right">
-											<i class="fa fa-cog margin-right-5"/>
-											<h:outputText value="#{msgs.plugin_massupload_startInserting}" />
-										</h:commandLink>
-										
-										<h:commandLink title="#{msgs.abbrechen}" 
-											action="#{NavigationForm.workflowPlugin.cleanUploadFolder}"
-											styleClass="btn font-size-s margin-top-most margin-right-5 pull-right">
-											<i class="fa fa-trash margin-right-5"/>
-											<h:outputText value="#{msgs.abbrechen}" />
-										</h:commandLink>
-										
-									</h:panelGroup>
-								</h:form>
-							</div>
+								<div class="col-sm-6">
+									<h:form id="actionarea">
+										<p:remoteCommand name="sortFiles" actionListener="#{NavigationForm.workflowPlugin.sortFiles}" update="actionarea, :actionform"/>
+	    
+										<h:panelGroup rendered="#{NavigationForm.workflowPlugin.uploadedFiles.size() > 0}">
+											<h:commandLink title="#{msgs.plugin_massupload_startInserting}" 
+												action="#{NavigationForm.workflowPlugin.startInserting}"
+												styleClass="btn btn-green font-size-s margin-top-most pull-right">
+												<i class="fa fa-cog margin-right-5"/>
+												<h:outputText value="#{msgs.plugin_massupload_startInserting}" />
+											</h:commandLink>
+											
+											<h:commandLink title="#{msgs.abbrechen}" 
+												action="#{NavigationForm.workflowPlugin.cleanUploadFolder}"
+												styleClass="btn font-size-s margin-top-most margin-right-5 pull-right">
+												<i class="fa fa-trash margin-right-5"/>
+												<h:outputText value="#{msgs.abbrechen}" />
+											</h:commandLink>
+											
+										</h:panelGroup>
+									</h:form>
+								</div>
+							</div> -->
+							<!--  list of all rows in uploaded excelfile -->
+							<div class="row">
+								<h:panelGroup id="actionform"  styleClass="col-xs-7" >
+									<div class="box box-color box-bordered lightgrey">
+										<div class="box-title">
+											<h3>
+												<h:outputText value="test" />
+											</h3>
+										</div>
+										<div class="box-content">
+							 				<ui:repeat var="row" value="#{NavigationForm.workflowPlugin.rowList}">
+							 					<div class="row">
+													<ui:repeat var="metadatum" value="#{row.contentList}">
+														<div class="row">
+															<div class="col-xs-4">
+																<font color="#{metadatum.valid?'black':'red'}">#{metadatum.headername}</font>
+															</div>
+															<div class="col-xs-8">
+																<font color="#{metadatum.valid?'black':'red'}">#{metadatum.value==''?'[empty field]':metadatum.value}</font>
+															</div>
+														</div>
+													</ui:repeat>											
+													<hr/>
+												</div>
+											</ui:repeat>
+										</div>
+									</div>								
+								</h:panelGroup>
+								<h:panelGroup class="col-xs-5">
+									<div class="box box-color box-bordered lightgrey">
+										<div class="box-title">
+											<h3>
+												<h:outputText value="Upload area" />
+											</h3>
+										</div>
+										<div class="box-content">
+											<div class="row">
+												<div class="col-xs-5">
+													Upload Excel file
+													#{NavigationForm.workflowPlugin.rowList.size()}
+												</div>
+												<div class="col-xs-7">
+													<h:form id="uploadform" prependId="false"  >
+													 	<p:fileUpload fileUploadListener="#{NavigationForm.workflowPlugin.uploadFile}" id="upload" auto="true"
+															style="text-align:center;" mode="advanced" multiple="true" dragDropSupport="true"
+															label="#{msgs.plugin_massupload_selectFiles}" sizeLimit="1000000000000"
+															allowTypes="#{NavigationForm.workflowPlugin.allowedTypes}" 
+															oncomplete="if(this.files.length == 0) sortFiles()" 
+															update=":actionform :test"/>
+													</h:form>
+												</div>
+											</div>
+											<h:panelGroup  id="test">
+												<ui:fragment  rendered="#{NavigationForm.workflowPlugin.rowList.size() > 0}" >
+													<hr/>
+													<div class="row">
+														<div class="col-xs-5 infofield">
+															Batch Name
+														</div>
+													</div>
+													<hr/>
+													<div class="row">
+														<div class="col-xs-5 infofield">
+															Manual metadata checking needed
+														</div>
+													</div>
+													<hr/>
+													<div class="row">
+														<div class="col-xs-5 infofield">
+															Responsible Editor
+														</div>
+													</div>
+													<hr/>
+													<h:form>
+													<div class="row">
+														<div class="col-xs-5 infofield">
+															Workflow to use
+														</div>
+														<div class="col-xs-7">
+															<h:selectOneMenu value="#{NavigationForm.workflowPlugin.templateName}">
+																<f:selectItems value="#{NavigationForm.workflowPlugin.templateNames}" var="process" 
+																itemLabel="#{process}" itemValue="#{process}">
+																</f:selectItems>
+																<f:ajax execute="@this" event="change"></f:ajax>
+															</h:selectOneMenu>
+														</div>
+													</div>
+													</h:form>
+													<hr/>
+														<h:form>
+													<div class="row">
+														<div class="col-xs-5">
+															#{NavigationForm.workflowPlugin.invalidFields}
+														</div>
+														<div class="col-xs-7">
+															<h:commandButton value="submit" action="#{NavigationForm.workflowPlugin.startImport()}">
+																<f:ajax render="@form" execute="@form">
+																	
+																</f:ajax>
+															</h:commandButton>
+														</div>
+													</div>
+														</h:form>
+												</ui:fragment>
+											</h:panelGroup>
+										</div>
+									</div>
+								
+								</h:panelGroup>
 							</div>
 							<!--  list of all uploaded files with action buttons -->
+							<!-- 
 							<h:panelGroup id="actionform"  styleClass="col-sm-12">
 							<div class="row">
 							
@@ -173,6 +288,7 @@
 								</h:form>
 								</div>
 							</h:panelGroup>
+							-->
 							
 						</div>
 					</div>

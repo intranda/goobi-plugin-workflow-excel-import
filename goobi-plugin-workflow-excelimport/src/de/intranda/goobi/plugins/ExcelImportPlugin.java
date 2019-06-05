@@ -15,6 +15,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.configuration.SubnodeConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
@@ -49,8 +51,10 @@ import org.primefaces.event.FileUploadEvent;
 import org.primefaces.model.UploadedFile;
 
 import de.intranda.goobi.plugins.datatype.Config;
+import de.intranda.goobi.plugins.datatype.DataRow;
 import de.intranda.goobi.plugins.datatype.GroupMappingObject;
 import de.intranda.goobi.plugins.datatype.MetadataMappingObject;
+import de.intranda.goobi.plugins.datatype.Metadatum;
 import de.intranda.goobi.plugins.datatype.PersonMappingObject;
 import de.intranda.goobi.plugins.massuploadutils.GoobiScriptCopyImages;
 import de.intranda.goobi.plugins.massuploadutils.MassUploadedFile;
@@ -59,6 +63,7 @@ import de.intranda.goobi.plugins.massuploadutils.MassUploadedProcess;
 import de.sub.goobi.config.ConfigPlugins;
 import de.sub.goobi.config.ConfigurationHelper;
 import de.sub.goobi.forms.MassImportForm;
+import de.sub.goobi.helper.BeanHelper;
 import de.sub.goobi.helper.Helper;
 import de.sub.goobi.helper.HelperSchritte;
 import de.sub.goobi.helper.StorageProvider;
@@ -115,8 +120,17 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 	private Config config;
 	private Prefs prefs;
 	private String importFolder;
-    private String ats;
-    private String volumeNumber;
+	private String ats;
+	private String volumeNumber;
+	private List<DataRow> rowList;
+
+	private Process prozessVorlage = new Process();
+	private BeanHelper bHelper = new BeanHelper();
+	private List<Process> templateList;
+	private Process processTemplate;
+	private List<String> templateNames;
+	private String templateName;
+	private List<Record> recordList;
 
 	/**
 	 * Constructor
@@ -161,6 +175,27 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 		return "/uii/plugin_workflow_massupload.xhtml";
 	}
 
+	public void setProcessTemplate(Process process) {
+		this.processTemplate = process;
+	}
+
+	public Process getProcessTemplate() {
+		return this.processTemplate;
+	}
+
+	public void writeTemplate() {
+		System.out.println(processTemplate);
+		System.out.println("test");
+	}
+
+	public void setTemplateName(String name) {
+		this.templateName = name;
+	}
+
+	public String getTemplateName() {
+		return this.templateName;
+	}
+
 	/**
 	 * Handle the upload of a file
 	 * 
@@ -179,21 +214,95 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 			}
 			UploadedFile upload = event.getFile();
 			saveFileTemporary(upload.getFileName(), upload.getInputstream());
-			excelFile=Paths.get(uploadedFiles.get(0).getFile().getAbsolutePath());
-			generateRecordsFromFile();
-			//TODO read excel file
-			//TODO validate every row
-			//TODO create metadata object per row
-			//TODO get preferences for process creation from UI/config
-			//TODO create process per row taking preferences into account
+			excelFile = Paths.get(uploadedFiles.get(0).getFile().getAbsolutePath());
+			recordList = generateRecordsFromFile();
+			rowList = validationTest(recordList);
+			System.out.println(rowList.size());
+			initTemplateList();
+			// TODO validate every row
+			// TODO create metadata object per row
+			// TODO get preferences for process creation from UI/config
+
+			// TODO create process per row taking preferences into account
+			System.out.println("done");
 		} catch (IOException e) {
 			log.error("Error while uploading files", e);
 		}
 
 	}
 
+	public void startImport() {
+		setTemplateFromString();
+		System.out.println(this.processTemplate.getTitel());
+		generateFiles(recordList);
+
+	}
+
+	private void setTemplateFromString() {
+		for (Process process : templateList) {
+			if (process.getTitel().equals(templateName)) {
+				this.processTemplate = process;
+			}
+		}
+	}
+
+	public String getInvalidFields() {
+		int rows = 0;
+		int fields = 0;
+		if (rowList == null || rowList.isEmpty()) {
+			return "";
+		}
+		for (DataRow a : rowList) {
+			if (a.getInvalidFields() > 0) {
+				rows += 1;
+				fields += a.getInvalidFields();
+			}
+		}
+		return String.valueOf(fields) + " invalid fields in " + String.valueOf(rows) + " rows";
+	}
+
 	public void sortFiles() {
 		Collections.sort(uploadedFiles);
+	}
+
+	private List<Process> initTemplateList() {
+		String sql = FilterHelper.criteriaBuilder("", true, null, null, null, true, false);
+		List<Process> templates = ProcessManager.getProcesses(null, sql);
+		this.templateList = templates;
+		initTemplateNames();
+		return templates;
+	}
+
+	private void initTemplateNames() {
+		List<String> templateNames = new ArrayList<>();
+		for (Process process : this.templateList) {
+			templateNames.add(process.getTitel());
+		}
+		this.templateNames = templateNames;
+	}
+
+	private Process createProcess(Process prozessVorlage, String title) throws DAOException {
+		Process prozessKopie = new Process();
+		prozessKopie.setTitel(title);
+		prozessKopie.setIstTemplate(false);
+		prozessKopie.setInAuswahllisteAnzeigen(false);
+		prozessKopie.setProjekt(prozessVorlage.getProjekt());
+		prozessKopie.setRegelsatz(prozessVorlage.getRegelsatz());
+		prozessKopie.setDocket(prozessVorlage.getDocket());
+
+		this.bHelper.SchritteKopieren(prozessVorlage, prozessKopie);
+		this.bHelper.ScanvorlagenKopieren(prozessVorlage, prozessKopie);
+		this.bHelper.WerkstueckeKopieren(prozessVorlage, prozessKopie);
+		this.bHelper.EigenschaftenKopieren(prozessVorlage, prozessKopie);
+
+		ProcessManager.saveProcess(prozessKopie);
+
+		return prozessKopie;
+	}
+
+	private void setMetadata(Process process) {
+		DigitalDocument dd = new DigitalDocument();
+
 	}
 
 	/**
@@ -223,7 +332,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 				out.write(bytes, 0, read);
 			}
 			out.flush();
-			File file =new File(tempFolder.toFile(),fileName);
+			File file = new File(tempFolder.toFile(), fileName);
 			MassUploadedFile muf = new MassUploadedFile(file, fileName);
 //			assignProcess(muf, null);
 			uploadedFiles.add(muf);
@@ -448,8 +557,6 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 		String idColumn = getConfig().getIdentifierHeaderName();
 		headerOrder = new HashMap<>();
 //		List<Column> columnList=new ArrayList<>();
-		
-		
 
 		try (InputStream fileInputStream = Files.newInputStream(excelFile);
 //				try (InputStream fileInputStream = new FileInputStream(excelFile);
@@ -580,6 +687,46 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 		return new Config(myconfig);
 	}
 
+	private List<DataRow> validationTest(List<Record> records) {
+		List<DataRow> rowlist = new ArrayList<>();
+		for (Record record : records) {
+			DataRow row = new DataRow();
+			@SuppressWarnings("unchecked")
+			Map<Integer, String> rowMap = (Map<Integer, String>) record.getObject();
+			String rowIdentifier = rowMap.get(headerOrder.get(config.getIdentifierHeaderName()));
+			row.setRowIdentifier(rowIdentifier);
+			for (MetadataMappingObject mmo : getConfig().getMetadataList()) {
+				Metadatum datum = new Metadatum();
+				datum.setHeadername(mmo.getHeaderName());
+				String value = rowMap.get(headerOrder.get(mmo.getHeaderName()));
+				datum.setValue(value);
+				if (mmo.isRequired()) {
+					if (value.isEmpty()) {
+						System.out.println(
+								"field " + mmo.getHeaderName() + " in " + rowIdentifier + " is required but empty");
+						datum.setValid(false);
+					}
+				}
+				if (!mmo.getPattern().isEmpty()) {
+					Pattern pattern = Pattern.compile(mmo.getPattern());
+					Matcher matcher = pattern.matcher(value);
+					if (!matcher.find()) {
+						datum.setValid(false);
+						System.out.println(
+								"field " + mmo.getHeaderName() + " in " + rowIdentifier + " does not match pattern");
+					}
+				}
+				row.getContentList().add(datum);
+				if (!datum.isValid()) {
+					row.setInvalidFields(row.getInvalidFields() + 1);
+				}
+
+			}
+			rowlist.add(row);
+		}
+		return rowlist;
+	}
+
 	public List<ImportObject> generateFiles(List<Record> records) {
 		List<ImportObject> answer = new ArrayList<>();
 
@@ -589,7 +736,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 			try {
 
 				Object tempObject = record.getObject();
-				
+
 				@SuppressWarnings("unchecked")
 				Map<Integer, String> rowMap = (Map<Integer, String>) tempObject;
 
@@ -666,6 +813,23 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 				for (MetadataMappingObject mmo : getConfig().getMetadataList()) {
 
 					String value = rowMap.get(headerOrder.get(mmo.getHeaderName()));
+//					if (mmo.isRequired()) {
+//						if (value.isEmpty()) {
+//							System.out.println("field " + mmo.getHeaderName() + " in "
+//									+ config.getIdentifierHeaderName() + "is required but empty");
+//						}
+//						// TODO check if value is empty and collect result
+//					}
+//					if (!mmo.getPattern().isEmpty()) {
+//						Pattern pattern = Pattern.compile(mmo.getPattern());
+//						Matcher matcher = pattern.matcher(value);
+//						if (!matcher.find()) {
+//							System.out.println("field " + mmo.getHeaderName() + " in "
+//									+ config.getIdentifierHeaderName() + "does not match pattern");
+//						}
+//						// TODO collect result
+//
+//					}
 					String identifier = null;
 					if (mmo.getNormdataHeaderName() != null) {
 						identifier = rowMap.get(headerOrder.get(mmo.getNormdataHeaderName()));
