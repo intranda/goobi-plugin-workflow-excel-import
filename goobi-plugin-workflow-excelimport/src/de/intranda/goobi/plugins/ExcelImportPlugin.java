@@ -31,16 +31,16 @@ import org.apache.poi.ss.usermodel.Row.MissingCellPolicy;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.goobi.beans.Batch;
 import org.goobi.beans.Process;
 import org.goobi.beans.Processproperty;
 import org.goobi.beans.Step;
 import org.goobi.beans.User;
+import org.goobi.beans.Usergroup;
 import org.goobi.managedbeans.LoginBean;
-import org.goobi.production.enums.ImportReturnValue;
 import org.goobi.production.enums.LogType;
 import org.goobi.production.enums.PluginType;
 import org.goobi.production.flow.statistics.hibernate.FilterHelper;
-import org.goobi.production.importer.ImportObject;
 import org.goobi.production.importer.Record;
 import org.goobi.production.plugin.PluginLoader;
 import org.goobi.production.plugin.interfaces.IOpacPlugin;
@@ -56,6 +56,7 @@ import de.intranda.goobi.plugins.datatype.GroupMappingObject;
 import de.intranda.goobi.plugins.datatype.MetadataMappingObject;
 import de.intranda.goobi.plugins.datatype.Metadatum;
 import de.intranda.goobi.plugins.datatype.PersonMappingObject;
+import de.intranda.goobi.plugins.datatype.UserWrapper;
 import de.intranda.goobi.plugins.massuploadutils.GoobiScriptCopyImages;
 import de.intranda.goobi.plugins.massuploadutils.MassUploadedFile;
 import de.intranda.goobi.plugins.massuploadutils.MassUploadedFileStatus;
@@ -129,8 +130,15 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 	private List<Process> templateList;
 	private Process processTemplate;
 	private List<String> templateNames;
-	private String templateName;
+	private String templateName = "";
 	private List<Record> recordList;
+	private String batchName;
+	private List<UserWrapper> users = new ArrayList<>();
+	private String userName;
+	private List<String> userNames;
+	private UserWrapper uw;
+	private boolean manualCorrection;
+	private String qaStepName;
 
 	/**
 	 * Constructor
@@ -152,6 +160,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 		// ConfigPlugins.getPluginConfig(this).getString("processname-separator",
 		// "_").toLowerCase();
 		stepTitles = ConfigPlugins.getPluginConfig(PLUGIN_NAME).getList("allowed-step");
+		qaStepName= ConfigPlugins.getPluginConfig(PLUGIN_NAME).getString("qaStepName");
 		copyImagesViaGoobiScript = ConfigPlugins.getPluginConfig(PLUGIN_NAME)
 				.getBoolean("copy-images-using-goobiscript", false);
 		LoginBean login = (LoginBean) Helper.getManagedBeanValue("#{LoginForm}");
@@ -175,25 +184,27 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 		return "/uii/plugin_workflow_massupload.xhtml";
 	}
 
-	public void setProcessTemplate(Process process) {
-		this.processTemplate = process;
-	}
-
-	public Process getProcessTemplate() {
-		return this.processTemplate;
-	}
-
-	public void writeTemplate() {
-		System.out.println(processTemplate);
-		System.out.println("test");
-	}
-
 	public void setTemplateName(String name) {
 		this.templateName = name;
+		System.out.println("reset userList");
+		userNames = null;
+		users = null;
+		userName = null;
 	}
 
-	public String getTemplateName() {
-		return this.templateName;
+	public void setBatchName(String name) {
+		this.batchName = name;
+	}
+
+	public List<String> getUserNames() {
+		if (userNames == null) {
+			updateUserNameList();
+			System.out.println("initialized user List; length: " + userNames.size());
+			for (String s : userNames) {
+				System.out.println(s);
+			}
+		}
+		return userNames;
 	}
 
 	/**
@@ -231,19 +242,147 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 
 	}
 
+	public void updateUserNameList() {
+		setTemplateFromString();
+		Step step = getStepByName(processTemplate, qaStepName);
+		List<Usergroup> oldGroups = new ArrayList<>();
+		users = new ArrayList<>();
+		if (step != null) {
+			for (Usergroup ug : step.getBenutzergruppen()) {
+				oldGroups.add(ug);
+				for (User u : ug.getBenutzer()) {
+					if (!userExistsInList(u)) {
+						users.add(new UserWrapper(u, false));
+					}
+				}
+			}
+			// get all current users
+			for (User u : step.getBenutzer()) {
+				if (!userExistsInList(u)) {
+					users.add(new UserWrapper(u, false));
+				}
+			}
+		}
+
+		userNames = new ArrayList<>();
+		if (step != null) {
+			if (users.isEmpty()) {
+				userNames.add("No users assigned to step");
+			} else {
+				userNames.add("Choose user");
+			}
+		} else {
+			userNames.add("No step with configured name found");
+		}
+		for (UserWrapper u : users) {
+			userNames.add(u.getUser().getNachVorname());
+		}
+	}
+
+	private UserWrapper getUserByName(String name) {
+		UserWrapper foundUser = null;
+		for (UserWrapper u : users) {
+			if (name.equals(u.getUser().getNachVorname())) {
+				foundUser = u;
+				break;
+			}
+		}
+		return foundUser;
+	}
+
+	private Step getStepByName(Process process, String stepName) {
+		List<Step> schritteListe = process.getSchritte();
+		Step schritt = null;
+		for (Step s : schritteListe) {
+			if (s.getTitel().equals(stepName)) {
+				schritt = s;
+				break;
+			}
+		}
+		return schritt;
+	}
+
 	public void startImport() {
 		setTemplateFromString();
 		System.out.println(this.processTemplate.getTitel());
-		generateFiles(recordList);
+		prefs = processTemplate.getRegelsatz().getPreferences();
+		Batch batch = new Batch();
+		batch.setBatchName(batchName);
+		for (Record record : recordList) {
+			try {
+				Process process = createProcess(processTemplate, record.getId());
+				generateFiles(record, process);
+				process.setBatch(batch);
+				if (manualCorrection) {
+					UserWrapper assignedUser = getUserByName(userName);
+					if (assignedUser != null) {
+						assignUserToStep(process, qaStepName, assignedUser);
+					}
+				} else {
+					Step step = getStepByName(process, qaStepName);
+					if (step != null) {
+						StepManager.deleteStep(step);
+					}
+				}
+				ProcessManager.saveProcess(process);
+
+			} catch (DAOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (SwapException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		ProcessManager.saveBatch(batch);
 
 	}
 
+	private void assignUserToStep(Process process, String stepName, UserWrapper assignedUser) throws DAOException {
+		Step step = getStepByName(process, stepName);
+		for (Usergroup ug : step.getBenutzergruppen()) {
+			StepManager.removeUsergroupFromStep(step, ug);
+		}
+		for (User u : step.getBenutzer()) {
+			StepManager.removeUserFromStep(step, u);
+		}
+		step.setBenutzer(new ArrayList<User>());
+		step.setBenutzergruppen(new ArrayList<Usergroup>());
+		step.getBenutzer().add(assignedUser.getUser());
+		StepManager.saveStep(step);
+	}
+
+	/**
+	 * check if a user exists in our internal list to avoid duplicates
+	 */
+	private boolean userExistsInList(User u) {
+		for (UserWrapper userWrapper : users) {
+			if (userWrapper.getUser().equals(u)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	private void setTemplateFromString() {
-		for (Process process : templateList) {
+		for (Process process : getTemplateList()) {
 			if (process.getTitel().equals(templateName)) {
 				this.processTemplate = process;
 			}
 		}
+	}
+
+	private List<Process> getTemplateList() {
+		if (templateList == null) {
+			initTemplateList();
+		}
+		return templateList;
 	}
 
 	public String getInvalidFields() {
@@ -258,7 +397,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 				fields += a.getInvalidFields();
 			}
 		}
-		return String.valueOf(fields) + " invalid fields in " + String.valueOf(rows) + " rows";
+		return String.valueOf(fields) + " invalid fields in " + rows + " rows";
 	}
 
 	public void sortFiles() {
@@ -274,11 +413,12 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 	}
 
 	private void initTemplateNames() {
-		List<String> templateNames = new ArrayList<>();
+		List<String> templateNamesInit = new ArrayList<>();
 		for (Process process : this.templateList) {
-			templateNames.add(process.getTitel());
+			templateNamesInit.add(process.getTitel());
 		}
-		this.templateNames = templateNames;
+		this.templateName = templateNamesInit.get(0);
+		this.templateNames = templateNamesInit;
 	}
 
 	private Process createProcess(Process prozessVorlage, String title) throws DAOException {
@@ -298,11 +438,6 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 		ProcessManager.saveProcess(prozessKopie);
 
 		return prozessKopie;
-	}
-
-	private void setMetadata(Process process) {
-		DigitalDocument dd = new DigitalDocument();
-
 	}
 
 	/**
@@ -727,268 +862,228 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 		return rowlist;
 	}
 
-	public List<ImportObject> generateFiles(List<Record> records) {
-		List<ImportObject> answer = new ArrayList<>();
+	public void generateFiles(Record record, Process process)
+			throws IOException, InterruptedException, SwapException, DAOException {
 
-		for (Record record : records) {
-			ImportObject io = new ImportObject();
+		try {
 
-			try {
+			Object tempObject = record.getObject();
 
-				Object tempObject = record.getObject();
+			@SuppressWarnings("unchecked")
+			Map<Integer, String> rowMap = (Map<Integer, String>) tempObject;
 
-				@SuppressWarnings("unchecked")
-				Map<Integer, String> rowMap = (Map<Integer, String>) tempObject;
+			// generate a mets file
+			DigitalDocument digitalDocument = null;
+			Fileformat ff = null;
+			DocStruct logical = null;
+			DocStruct anchor = null;
+			if (!config.isUseOpac()) {
+				ff = new MetsMods(prefs);
+				digitalDocument = new DigitalDocument();
+				ff.setDigitalDocument(digitalDocument);
+				String publicationType = getConfig().getPublicationType();
+				DocStructType logicalType = prefs.getDocStrctTypeByName(publicationType);
+				logical = digitalDocument.createDocStruct(logicalType);
+				digitalDocument.setLogicalDocStruct(logical);
+			} else {
+				try {
+					if (StringUtils.isBlank(config.getIdentifierHeaderName())) {
+						Helper.setFehlerMeldung("Cannot request catalogue, no identifier column defined");
+						return;
+					}
 
-				// generate a mets file
-				DigitalDocument digitalDocument = null;
-				Fileformat ff = null;
-				DocStruct logical = null;
-				DocStruct anchor = null;
-				if (!config.isUseOpac()) {
-					ff = new MetsMods(prefs);
-					digitalDocument = new DigitalDocument();
-					ff.setDigitalDocument(digitalDocument);
-					String publicationType = getConfig().getPublicationType();
-					DocStructType logicalType = prefs.getDocStrctTypeByName(publicationType);
-					logical = digitalDocument.createDocStruct(logicalType);
-					digitalDocument.setLogicalDocStruct(logical);
-					answer.add(io);
-				} else {
+					String catalogueIdentifier = rowMap.get(headerOrder.get(config.getIdentifierHeaderName()));
+					if (StringUtils.isBlank(catalogueIdentifier)) {
+						return;
+					}
+					ff = getRecordFromCatalogue(catalogueIdentifier);
+					digitalDocument = ff.getDigitalDocument();
+					logical = digitalDocument.getLogicalDocStruct();
+					if (logical.getType().isAnchor()) {
+						anchor = logical;
+						logical = anchor.getAllChildren().get(0);
+					}
+				} catch (ImportPluginException e) {
+					log.error(e);
+					return;
+				}
+			}
+
+			DocStructType physicalType = prefs.getDocStrctTypeByName("BoundBook");
+			DocStruct physical = digitalDocument.createDocStruct(physicalType);
+			digitalDocument.setPhysicalDocStruct(physical);
+			Metadata imagePath = new Metadata(prefs.getMetadataTypeByName("pathimagefiles"));
+			imagePath.setValue("./images/");
+			physical.addMetadata(imagePath);
+
+			// add collections if configured
+			String col = getConfig().getCollection();
+			if (StringUtils.isNotBlank(col)) {
+				Metadata mdColl = new Metadata(prefs.getMetadataTypeByName("singleDigCollection"));
+				mdColl.setValue(col);
+				logical.addMetadata(mdColl);
+			}
+			// and add all collections that where selected
+//			for (String colItem : form.getDigitalCollections()) {
+//				if (!colItem.equals(col.trim())) {
+//					Metadata mdColl = new Metadata(prefs.getMetadataTypeByName("singleDigCollection"));
+//					mdColl.setValue(colItem);
+//					logical.addMetadata(mdColl);
+//				}
+//			}
+			// create file name for mets file
+
+			// create importobject for massimport
+
+			for (MetadataMappingObject mmo : getConfig().getMetadataList()) {
+
+				String value = rowMap.get(headerOrder.get(mmo.getHeaderName()));
+				String identifier = null;
+				if (mmo.getNormdataHeaderName() != null) {
+					identifier = rowMap.get(headerOrder.get(mmo.getNormdataHeaderName()));
+				}
+				if (StringUtils.isNotBlank(mmo.getRulesetName()) && StringUtils.isNotBlank(value)) {
 					try {
-						if (StringUtils.isBlank(config.getIdentifierHeaderName())) {
-							Helper.setFehlerMeldung("Cannot request catalogue, no identifier column defined");
-							return Collections.emptyList();
+						Metadata md = new Metadata(prefs.getMetadataTypeByName(mmo.getRulesetName()));
+						md.setValue(value);
+						if (identifier != null) {
+							md.setAutorityFile("gnd", "http://d-nb.info/gnd/", identifier);
+
 						}
-
-						String catalogueIdentifier = rowMap.get(headerOrder.get(config.getIdentifierHeaderName()));
-						if (StringUtils.isBlank(catalogueIdentifier)) {
-							continue;
-						}
-						ff = getRecordFromCatalogue(catalogueIdentifier);
-						digitalDocument = ff.getDigitalDocument();
-						logical = digitalDocument.getLogicalDocStruct();
-						if (logical.getType().isAnchor()) {
-							anchor = logical;
-							logical = anchor.getAllChildren().get(0);
-						}
-						answer.add(io);
-					} catch (ImportPluginException e) {
-						log.error(e);
-						io.setErrorMessage(e.getMessage());
-						io.setImportReturnValue(ImportReturnValue.NoData);
-						continue;
-					}
-				}
-
-				DocStructType physicalType = prefs.getDocStrctTypeByName("BoundBook");
-				DocStruct physical = digitalDocument.createDocStruct(physicalType);
-				digitalDocument.setPhysicalDocStruct(physical);
-				Metadata imagePath = new Metadata(prefs.getMetadataTypeByName("pathimagefiles"));
-				imagePath.setValue("./images/");
-				physical.addMetadata(imagePath);
-
-				// add collections if configured
-				String col = getConfig().getCollection();
-				if (StringUtils.isNotBlank(col)) {
-					Metadata mdColl = new Metadata(prefs.getMetadataTypeByName("singleDigCollection"));
-					mdColl.setValue(col);
-					logical.addMetadata(mdColl);
-				}
-				// and add all collections that where selected
-				for (String colItem : form.getDigitalCollections()) {
-					if (!colItem.equals(col.trim())) {
-						Metadata mdColl = new Metadata(prefs.getMetadataTypeByName("singleDigCollection"));
-						mdColl.setValue(colItem);
-						logical.addMetadata(mdColl);
-					}
-				}
-				// create file name for mets file
-				String fileName = null;
-
-				// create importobject for massimport
-				io.setProcessTitle(record.getId());
-				io.setImportReturnValue(ImportReturnValue.ExportFinished);
-
-				for (MetadataMappingObject mmo : getConfig().getMetadataList()) {
-
-					String value = rowMap.get(headerOrder.get(mmo.getHeaderName()));
-//					if (mmo.isRequired()) {
-//						if (value.isEmpty()) {
-//							System.out.println("field " + mmo.getHeaderName() + " in "
-//									+ config.getIdentifierHeaderName() + "is required but empty");
-//						}
-//						// TODO check if value is empty and collect result
-//					}
-//					if (!mmo.getPattern().isEmpty()) {
-//						Pattern pattern = Pattern.compile(mmo.getPattern());
-//						Matcher matcher = pattern.matcher(value);
-//						if (!matcher.find()) {
-//							System.out.println("field " + mmo.getHeaderName() + " in "
-//									+ config.getIdentifierHeaderName() + "does not match pattern");
-//						}
-//						// TODO collect result
-//
-//					}
-					String identifier = null;
-					if (mmo.getNormdataHeaderName() != null) {
-						identifier = rowMap.get(headerOrder.get(mmo.getNormdataHeaderName()));
-					}
-					if (StringUtils.isNotBlank(mmo.getRulesetName()) && StringUtils.isNotBlank(value)) {
-						try {
-							Metadata md = new Metadata(prefs.getMetadataTypeByName(mmo.getRulesetName()));
-							md.setValue(value);
-							if (identifier != null) {
-								md.setAutorityFile("gnd", "http://d-nb.info/gnd/", identifier);
-
-							}
-							if (anchor != null && "anchor".equals(mmo.getDocType())) {
-								anchor.addMetadata(md);
-							} else {
-								logical.addMetadata(md);
-							}
-						} catch (MetadataTypeNotAllowedException e) {
-							log.info(e);
-							// Metadata is not known or not allowed
-						}
-
-						if (mmo.getRulesetName().equalsIgnoreCase("CatalogIDDigital")
-								&& !"anchor".equals(mmo.getDocType())) {
-							fileName = getImportFolder() + File.separator + value + ".xml";
-							io.setProcessTitle(value);
-							io.setMetsFilename(fileName);
-						}
-					}
-
-					if (StringUtils.isNotBlank(mmo.getPropertyName())) {
-						Processproperty p = new Processproperty();
-						p.setTitel(mmo.getPropertyName());
-						p.setWert(value);
-						io.getProcessProperties().add(p);
-					}
-				}
-
-				for (PersonMappingObject mmo : getConfig().getPersonList()) {
-					String firstname = "";
-					String lastname = "";
-					if (mmo.isSplitName()) {
-						String name = rowMap.get(headerOrder.get(mmo.getHeaderName()));
-						if (StringUtils.isNotBlank(name)) {
-							if (name.contains(mmo.getSplitChar())) {
-								if (mmo.isFirstNameIsFirst()) {
-									firstname = name.substring(0, name.lastIndexOf(mmo.getSplitChar()));
-									lastname = name.substring(name.lastIndexOf(mmo.getSplitChar()));
-								} else {
-									lastname = name.substring(0, name.lastIndexOf(mmo.getSplitChar())).trim();
-									firstname = name.substring(name.lastIndexOf(mmo.getSplitChar()) + 1).trim();
-								}
-							} else {
-								lastname = name;
-							}
-						}
-					} else {
-						firstname = rowMap.get(headerOrder.get(mmo.getFirstnameHeaderName()));
-						lastname = rowMap.get(headerOrder.get(mmo.getLastnameHeaderName()));
-					}
-
-					String identifier = null;
-					if (mmo.getNormdataHeaderName() != null) {
-						identifier = rowMap.get(headerOrder.get(mmo.getNormdataHeaderName()));
-					}
-					if (StringUtils.isNotBlank(mmo.getRulesetName())) {
-						try {
-							Person p = new Person(prefs.getMetadataTypeByName(mmo.getRulesetName()));
-							p.setFirstname(firstname);
-							p.setLastname(lastname);
-
-							if (identifier != null) {
-								p.setAutorityFile("gnd", "http://d-nb.info/gnd/", identifier);
-							}
-							if (anchor != null && "anchor".equals(mmo.getDocType())) {
-								anchor.addPerson(p);
-							} else {
-								logical.addPerson(p);
-							}
-
-							// logical.addPerson(p);
-						} catch (MetadataTypeNotAllowedException e) {
-							log.info(e);
-							// Metadata is not known or not allowed
-						}
-					}
-				}
-
-				for (GroupMappingObject gmo : getConfig().getGroupList()) {
-					try {
-						MetadataGroup group = new MetadataGroup(prefs.getMetadataGroupTypeByName(gmo.getRulesetName()));
-						for (MetadataMappingObject mmo : gmo.getMetadataList()) {
-							String value = rowMap.get(headerOrder.get(mmo.getHeaderName()));
-							Metadata md = new Metadata(prefs.getMetadataTypeByName(mmo.getRulesetName()));
-							md.setValue(value);
-							if (mmo.getNormdataHeaderName() != null) {
-								md.setAutorityFile("gnd", "http://d-nb.info/gnd/",
-										rowMap.get(headerOrder.get(mmo.getNormdataHeaderName())));
-							}
-							group.addMetadata(md);
-						}
-						for (PersonMappingObject pmo : gmo.getPersonList()) {
-							Person p = new Person(prefs.getMetadataTypeByName(pmo.getRulesetName()));
-							String firstname = "";
-							String lastname = "";
-							if (pmo.isSplitName()) {
-								String name = rowMap.get(headerOrder.get(pmo.getHeaderName()));
-								if (StringUtils.isNotBlank(name)) {
-									if (name.contains(pmo.getSplitChar())) {
-										if (pmo.isFirstNameIsFirst()) {
-											firstname = name.substring(0, name.lastIndexOf(pmo.getSplitChar()));
-											lastname = name.substring(name.lastIndexOf(pmo.getSplitChar()));
-										} else {
-											lastname = name.substring(0, name.lastIndexOf(pmo.getSplitChar()));
-											firstname = name.substring(name.lastIndexOf(pmo.getSplitChar()));
-										}
-									} else {
-										lastname = name;
-									}
-								}
-							} else {
-								firstname = rowMap.get(headerOrder.get(pmo.getFirstnameHeaderName()));
-								lastname = rowMap.get(headerOrder.get(pmo.getLastnameHeaderName()));
-							}
-
-							p.setFirstname(firstname);
-							p.setLastname(lastname);
-
-							if (pmo.getNormdataHeaderName() != null) {
-								p.setAutorityFile("gnd", "http://d-nb.info/gnd/",
-										rowMap.get(headerOrder.get(pmo.getNormdataHeaderName())));
-							}
-							group.addMetadata(p);
-						}
-						if (anchor != null && "anchor".equals(gmo.getDocType())) {
-							anchor.addMetadataGroup(group);
+						if (anchor != null && "anchor".equals(mmo.getDocType())) {
+							anchor.addMetadata(md);
 						} else {
-							logical.addMetadataGroup(group);
+							logical.addMetadata(md);
 						}
-
-						// logical.addMetadataGroup(group);
-
 					} catch (MetadataTypeNotAllowedException e) {
 						log.info(e);
 						// Metadata is not known or not allowed
 					}
 				}
 
-				// write mets file into import folder
-				ff.write(fileName);
-			} catch (WriteException | PreferencesException | MetadataTypeNotAllowedException
-					| TypeNotAllowedForParentException e) {
-				io.setImportReturnValue(ImportReturnValue.WriteError);
-				io.setErrorMessage(e.getMessage());
+				if (StringUtils.isNotBlank(mmo.getPropertyName())) {
+					Processproperty p = new Processproperty();
+					p.setTitel(mmo.getPropertyName());
+					p.setWert(value);
+				}
 			}
 
+			for (PersonMappingObject mmo : getConfig().getPersonList()) {
+				String firstname = "";
+				String lastname = "";
+				if (mmo.isSplitName()) {
+					String name = rowMap.get(headerOrder.get(mmo.getHeaderName()));
+					if (StringUtils.isNotBlank(name)) {
+						if (name.contains(mmo.getSplitChar())) {
+							if (mmo.isFirstNameIsFirst()) {
+								firstname = name.substring(0, name.lastIndexOf(mmo.getSplitChar()));
+								lastname = name.substring(name.lastIndexOf(mmo.getSplitChar()));
+							} else {
+								lastname = name.substring(0, name.lastIndexOf(mmo.getSplitChar())).trim();
+								firstname = name.substring(name.lastIndexOf(mmo.getSplitChar()) + 1).trim();
+							}
+						} else {
+							lastname = name;
+						}
+					}
+				} else {
+					firstname = rowMap.get(headerOrder.get(mmo.getFirstnameHeaderName()));
+					lastname = rowMap.get(headerOrder.get(mmo.getLastnameHeaderName()));
+				}
+
+				String identifier = null;
+				if (mmo.getNormdataHeaderName() != null) {
+					identifier = rowMap.get(headerOrder.get(mmo.getNormdataHeaderName()));
+				}
+				if (StringUtils.isNotBlank(mmo.getRulesetName())) {
+					try {
+						Person p = new Person(prefs.getMetadataTypeByName(mmo.getRulesetName()));
+						p.setFirstname(firstname);
+						p.setLastname(lastname);
+
+						if (identifier != null) {
+							p.setAutorityFile("gnd", "http://d-nb.info/gnd/", identifier);
+						}
+						if (anchor != null && "anchor".equals(mmo.getDocType())) {
+							anchor.addPerson(p);
+						} else {
+							logical.addPerson(p);
+						}
+
+						// logical.addPerson(p);
+					} catch (MetadataTypeNotAllowedException e) {
+						log.info(e);
+						// Metadata is not known or not allowed
+					}
+				}
+			}
+
+			for (GroupMappingObject gmo : getConfig().getGroupList()) {
+				try {
+					MetadataGroup group = new MetadataGroup(prefs.getMetadataGroupTypeByName(gmo.getRulesetName()));
+					for (MetadataMappingObject mmo : gmo.getMetadataList()) {
+						String value = rowMap.get(headerOrder.get(mmo.getHeaderName()));
+						Metadata md = new Metadata(prefs.getMetadataTypeByName(mmo.getRulesetName()));
+						md.setValue(value);
+						if (mmo.getNormdataHeaderName() != null) {
+							md.setAutorityFile("gnd", "http://d-nb.info/gnd/",
+									rowMap.get(headerOrder.get(mmo.getNormdataHeaderName())));
+						}
+						group.addMetadata(md);
+					}
+					for (PersonMappingObject pmo : gmo.getPersonList()) {
+						Person p = new Person(prefs.getMetadataTypeByName(pmo.getRulesetName()));
+						String firstname = "";
+						String lastname = "";
+						if (pmo.isSplitName()) {
+							String name = rowMap.get(headerOrder.get(pmo.getHeaderName()));
+							if (StringUtils.isNotBlank(name)) {
+								if (name.contains(pmo.getSplitChar())) {
+									if (pmo.isFirstNameIsFirst()) {
+										firstname = name.substring(0, name.lastIndexOf(pmo.getSplitChar()));
+										lastname = name.substring(name.lastIndexOf(pmo.getSplitChar()));
+									} else {
+										lastname = name.substring(0, name.lastIndexOf(pmo.getSplitChar()));
+										firstname = name.substring(name.lastIndexOf(pmo.getSplitChar()));
+									}
+								} else {
+									lastname = name;
+								}
+							}
+						} else {
+							firstname = rowMap.get(headerOrder.get(pmo.getFirstnameHeaderName()));
+							lastname = rowMap.get(headerOrder.get(pmo.getLastnameHeaderName()));
+						}
+
+						p.setFirstname(firstname);
+						p.setLastname(lastname);
+
+						if (pmo.getNormdataHeaderName() != null) {
+							p.setAutorityFile("gnd", "http://d-nb.info/gnd/",
+									rowMap.get(headerOrder.get(pmo.getNormdataHeaderName())));
+						}
+						group.addMetadata(p);
+					}
+					if (anchor != null && "anchor".equals(gmo.getDocType())) {
+						anchor.addMetadataGroup(group);
+					} else {
+						logical.addMetadataGroup(group);
+					}
+
+					// logical.addMetadataGroup(group);
+
+				} catch (MetadataTypeNotAllowedException e) {
+					log.info(e);
+					// Metadata is not known or not allowed
+				}
+			}
+
+			// write mets file into import folder
+			process.writeMetadataFile(ff);
+		} catch (WriteException | PreferencesException | MetadataTypeNotAllowedException
+				| TypeNotAllowedForParentException e) {
 		}
-		// end of all excel rows
-		return answer;
+
 	}
 
 	private Fileformat getRecordFromCatalogue(String identifier) throws ImportPluginException {
@@ -1042,4 +1137,115 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 
 		return myRdf;
 	}
+
+//	private void createMetadata(Record r, Process process ) {
+//		Map<Integer, String> rowMap = (Map<Integer, String>) r;
+//		String fileName=process.getMetadataFilePath();
+//		for (MetadataMappingObject mmo : getConfig().getMetadataList()) {
+//
+//			String value = rowMap.get(headerOrder.get(mmo.getHeaderName()));
+////		if (mmo.isRequired()) {
+////			if (value.isEmpty()) {
+////				System.out.println("field " + mmo.getHeaderName() + " in "
+////						+ config.getIdentifierHeaderName() + "is required but empty");
+////			}
+////			// TODO check if value is empty and collect result
+////		}
+////		if (!mmo.getPattern().isEmpty()) {
+////			Pattern pattern = Pattern.compile(mmo.getPattern());
+////			Matcher matcher = pattern.matcher(value);
+////			if (!matcher.find()) {
+////				System.out.println("field " + mmo.getHeaderName() + " in "
+////						+ config.getIdentifierHeaderName() + "does not match pattern");
+////			}
+////			// TODO collect result
+////
+////		}
+//			String identifier = null;
+//			if (mmo.getNormdataHeaderName() != null) {
+//				identifier = rowMap.get(headerOrder.get(mmo.getNormdataHeaderName()));
+//			}
+//			if (StringUtils.isNotBlank(mmo.getRulesetName()) && StringUtils.isNotBlank(value)) {
+//				try {
+//					Metadata md = new Metadata(prefs.getMetadataTypeByName(mmo.getRulesetName()));
+//					md.setValue(value);
+//					if (identifier != null) {
+//						md.setAutorityFile("gnd", "http://d-nb.info/gnd/", identifier);
+//
+//					}
+//					if (anchor != null && "anchor".equals(mmo.getDocType())) {
+//						anchor.addMetadata(md);
+//					} else {
+//						logical.addMetadata(md);
+//					}
+//				} catch (MetadataTypeNotAllowedException e) {
+//					log.info(e);
+//					// Metadata is not known or not allowed
+//				}
+//
+//				if (mmo.getRulesetName().equalsIgnoreCase("CatalogIDDigital") && !"anchor".equals(mmo.getDocType())) {
+//					fileName = getImportFolder() + File.separator + value + ".xml";
+//					io.setProcessTitle(value);
+//					io.setMetsFilename(fileName);
+//				}
+//			}
+//
+//			if (StringUtils.isNotBlank(mmo.getPropertyName())) {
+//				Processproperty p = new Processproperty();
+//				p.setTitel(mmo.getPropertyName());
+//				p.setWert(value);
+//				io.getProcessProperties().add(p);
+//			}
+//		}
+//
+//		for (PersonMappingObject mmo : getConfig().getPersonList()) {
+//			String firstname = "";
+//			String lastname = "";
+//			if (mmo.isSplitName()) {
+//				String name = rowMap.get(headerOrder.get(mmo.getHeaderName()));
+//				if (StringUtils.isNotBlank(name)) {
+//					if (name.contains(mmo.getSplitChar())) {
+//						if (mmo.isFirstNameIsFirst()) {
+//							firstname = name.substring(0, name.lastIndexOf(mmo.getSplitChar()));
+//							lastname = name.substring(name.lastIndexOf(mmo.getSplitChar()));
+//						} else {
+//							lastname = name.substring(0, name.lastIndexOf(mmo.getSplitChar())).trim();
+//							firstname = name.substring(name.lastIndexOf(mmo.getSplitChar()) + 1).trim();
+//						}
+//					} else {
+//						lastname = name;
+//					}
+//				}
+//			} else {
+//				firstname = rowMap.get(headerOrder.get(mmo.getFirstnameHeaderName()));
+//				lastname = rowMap.get(headerOrder.get(mmo.getLastnameHeaderName()));
+//			}
+//
+//			String identifier = null;
+//			if (mmo.getNormdataHeaderName() != null) {
+//				identifier = rowMap.get(headerOrder.get(mmo.getNormdataHeaderName()));
+//			}
+//			if (StringUtils.isNotBlank(mmo.getRulesetName())) {
+//				try {
+//					Person p = new Person(prefs.getMetadataTypeByName(mmo.getRulesetName()));
+//					p.setFirstname(firstname);
+//					p.setLastname(lastname);
+//
+//					if (identifier != null) {
+//						p.setAutorityFile("gnd", "http://d-nb.info/gnd/", identifier);
+//					}
+//					if (anchor != null && "anchor".equals(mmo.getDocType())) {
+//						anchor.addPerson(p);
+//					} else {
+//						logical.addPerson(p);
+//					}
+//
+//					// logical.addPerson(p);
+//				} catch (MetadataTypeNotAllowedException e) {
+//					log.info(e);
+//					// Metadata is not known or not allowed
+//				}
+//			}
+//		}
+//	}
 }

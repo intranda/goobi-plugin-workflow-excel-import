@@ -171,25 +171,44 @@
 											<h:panelGroup  id="test">
 												<ui:fragment  rendered="#{NavigationForm.workflowPlugin.rowList.size() > 0}" >
 													<hr/>
+													<h:form>
 													<div class="row">
 														<div class="col-xs-5 infofield">
 															Batch Name
 														</div>
-													</div>
-													<hr/>
-													<div class="row">
-														<div class="col-xs-5 infofield">
-															Manual metadata checking needed
+														<div class="col-xs-7">
+															<h:inputText value="#{NavigationForm.workflowPlugin.batchName}" id="batchName">
+<!-- 																<f:ajax execute="@this" event= -->
+															</h:inputText>
 														</div>
 													</div>
 													<hr/>
-													<div class="row">
-														<div class="col-xs-5 infofield">
-															Responsible Editor
+														<div class="row">
+															<div class="col-xs-5 infofield">
+																Manual metadata checking needed
+															</div>
+															
+															<div class="col-xs-7">
+																<h:selectBooleanCheckbox value="#{NavigationForm.workflowPlugin.manualCorrection}">
+																	<f:ajax execute="@this" event="change"></f:ajax>
+																</h:selectBooleanCheckbox>
+															</div>
 														</div>
-													</div>
 													<hr/>
-													<h:form>
+														<div class="row">
+															<div class="col-xs-5 infofield">
+																Responsible Editor
+															</div>
+															<div class="col-xs-7">
+																<h:selectOneMenu value="#{NavigationForm.workflowPlugin.userName}" id="responsibleEditor">
+																	<f:selectItems value="#{NavigationForm.workflowPlugin.userNames}" var="process" 
+																	itemLabel="#{process}" itemValue="#{process}">
+																	</f:selectItems>
+																	<f:ajax execute="@this" event="change"></f:ajax>
+																</h:selectOneMenu>
+															</div>
+														</div>
+													<hr/>
 													<div class="row">
 														<div class="col-xs-5 infofield">
 															Workflow to use
@@ -199,20 +218,18 @@
 																<f:selectItems value="#{NavigationForm.workflowPlugin.templateNames}" var="process" 
 																itemLabel="#{process}" itemValue="#{process}">
 																</f:selectItems>
-																<f:ajax execute="@this" event="change"></f:ajax>
+																<f:ajax execute="@this" event="change" render="responsibleEditor"></f:ajax>
 															</h:selectOneMenu>
 														</div>
 													</div>
-													</h:form>
 													<hr/>
-														<h:form>
 													<div class="row">
 														<div class="col-xs-5">
 															#{NavigationForm.workflowPlugin.invalidFields}
 														</div>
 														<div class="col-xs-7">
 															<h:commandButton value="submit" action="#{NavigationForm.workflowPlugin.startImport()}">
-																<f:ajax render="@form" execute="@form">
+																<f:ajax render="@none" execute="@this batchName">
 																	
 																</f:ajax>
 															</h:commandButton>
