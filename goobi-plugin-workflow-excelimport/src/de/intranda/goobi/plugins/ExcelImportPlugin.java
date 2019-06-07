@@ -160,7 +160,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 		// ConfigPlugins.getPluginConfig(this).getString("processname-separator",
 		// "_").toLowerCase();
 		stepTitles = ConfigPlugins.getPluginConfig(PLUGIN_NAME).getList("allowed-step");
-		qaStepName= ConfigPlugins.getPluginConfig(PLUGIN_NAME).getString("qaStepName");
+		qaStepName = ConfigPlugins.getPluginConfig(PLUGIN_NAME).getString("qaStepName");
 		copyImagesViaGoobiScript = ConfigPlugins.getPluginConfig(PLUGIN_NAME)
 				.getBoolean("copy-images-using-goobiscript", false);
 		LoginBean login = (LoginBean) Helper.getManagedBeanValue("#{LoginForm}");
@@ -836,13 +836,13 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 				String value = rowMap.get(headerOrder.get(mmo.getHeaderName()));
 				datum.setValue(value);
 				if (mmo.isRequired()) {
-					if (value==null || value.isEmpty()) {
+					if (value == null || value.isEmpty()) {
 						System.out.println(
 								"field " + mmo.getHeaderName() + " in " + rowIdentifier + " is required but empty");
 						datum.setValid(false);
 					}
 				}
-				if (!mmo.getPattern().isEmpty()) {
+				if (!mmo.getPattern().isEmpty()&& value!=null && !value.isEmpty()) {
 					Pattern pattern = Pattern.compile(mmo.getPattern());
 					Matcher matcher = pattern.matcher(value);
 					if (!matcher.find()) {
@@ -851,11 +851,14 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 								"field " + mmo.getHeaderName() + " in " + rowIdentifier + " does not match pattern");
 					}
 				}
-				if(!mmo.getValidContent().isEmpty()) {
-					if(!mmo.getValidContent().contains(value)) {
-						datum.setValid(false);
-						System.out.println(
-								"field " + mmo.getHeaderName() + " in " + rowIdentifier + " not contained in List");
+				if (!mmo.getValidContent().isEmpty()) {
+					String[] valueList = value.split("; ");
+					for (String v : valueList) {
+						if (!mmo.getValidContent().contains(v)) {
+							datum.setValid(false);
+							System.out.println(
+									"field " + mmo.getHeaderName() + " in " + rowIdentifier + " not contained in List");
+						}
 					}
 				}
 				row.getContentList().add(datum);

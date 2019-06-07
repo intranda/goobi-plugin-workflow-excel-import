@@ -51,9 +51,27 @@
 				
 			}
 			
-			.infofield{
-			border-right: 6px solid green
+			.bg-gray{
+				background-color: #ccc;
 			}
+			
+/* 			.process-parameters {} */
+/* 			.process-parameters .row { */
+/* 				border-bottom: 1px solid #ccc; */
+/* 			} */
+/* 			.process-parameters [class*="col-"] { */
+/* 				padding: 0; */
+/* 			} */
+/* 			.process-parameters__key, */
+/* 			.process-parameters__value { */
+/* 			} */
+/* 			.process-parameters__key { */
+/* 				padding: 15px; */
+/* 				background-color: #eee; */
+/* 			} */
+/* 			.process-parameters__value { */
+/* 				padding: 12px 15px 11px 15px; */
+/* 			} */
 		</style>
 
         <h:outputText styleClass="alert alert-danger block margin-top-most" value="#{msgs.noAccessAllowed} Plugin_Goobi_Massupload" 
@@ -62,159 +80,122 @@
         <h:panelGroup rendered="#{LoginForm.hasRole('Plugin_Goobi_Massupload')}">
 			<div class="row">
 				<div class="col-sm-12">
-					<div class="box box-color box-bordered lightgrey">
-						<div class="box-title">
-							<h3>
-								<i class="fa fa-plug"></i>
-								<h:outputText value="#{msgs[NavigationForm.workflowPlugin.title]}" />
-							</h3>
-						</div>
-						<div class="box-content">
-							<!-- <div class="row" style="padding:15px;">
-							
-							Upload area
-								<div class="col-sm-6" >
-									<div class="draganddroparea" >
-										<h:form id="uploadform" prependId="false"  >
-										 	<p:fileUpload fileUploadListener="#{NavigationForm.workflowPlugin.uploadFile}" id="upload" auto="true"
-												style="text-align:center;" mode="advanced" multiple="true" dragDropSupport="true"
-												label="#{msgs.plugin_massupload_selectFiles}" sizeLimit="1000000000000"
-												allowTypes="#{NavigationForm.workflowPlugin.allowedTypes}" 
-												oncomplete="if(this.files.length == 0) sortFiles()" 
-												update=":actionform"/>
-										</h:form>
+					<!--  list of all rows in uploaded excelfile -->
+					<div class="row">
+						<h:panelGroup id="actionform"  styleClass="col-xs-7" >
+							<div class="box box-color box-bordered lightgrey" >
+								<div class="box-title">
+									<h3>
+										<h:outputText value="Validation results" />
+									</h3>
+								</div>
+								<div class="box-content">
+									<ui:fragment rendered="#{NavigationForm.workflowPlugin.rowList == null}" style="text-align:center;">
+									<p style="text-align:center; font-size:large;">Please upload an Excel file to validate it.</p>
+									</ui:fragment>
+					 				<ui:repeat var="row" value="#{NavigationForm.workflowPlugin.rowList}">
+					 					<div class="row">
+											<ui:repeat var="metadatum" value="#{row.contentList}">
+												<div class="row">
+													<div class="col-xs-4">
+														<font color="#{metadatum.valid?'black':'red'}">#{metadatum.headername}</font>
+													</div>
+													<div class="col-xs-8">
+														<font color="#{metadatum.valid?'black':'red'}">#{metadatum.value==''?'[empty field]':metadatum.value}</font>
+													</div>
+												</div>
+											</ui:repeat>											
+											<hr/>
+										</div>
+									</ui:repeat>
+								</div>
+							</div>	
+						</h:panelGroup>
+						<h:panelGroup class="col-xs-5">
+							<div class="box box-color box-bordered orange">
+								<div class="box-title">
+									<h3>
+										<h:outputText value="Upload area" />
+									</h3>
+								</div>
+								<div class="box-content">
+									<div class="row">
+										<div class="col-xs-5">
+											Upload Excel file
+											#{NavigationForm.workflowPlugin.rowList.size()}
+										</div>
+										<div class="col-xs-7">
+											<h:form id="uploadform" prependId="false"  >
+											 	<p:fileUpload fileUploadListener="#{NavigationForm.workflowPlugin.uploadFile}" id="upload" auto="true"
+													style="text-align:center;" mode="advanced" multiple="true" dragDropSupport="true"
+													label="#{msgs.plugin_massupload_selectFiles}" sizeLimit="1000000000000"
+													allowTypes="#{NavigationForm.workflowPlugin.allowedTypes}" 
+													oncomplete="if(this.files.length == 0) sortFiles()" 
+													update=":actionform :processParameters"/>
+											</h:form>
+										</div>
 									</div>
-									<h:form>
-										<h:commandLink title="#{msgs.plugin_massupload_use_home_directory}" 
-											action="#{NavigationForm.workflowPlugin.readFilesFromUserHomeFolder}"
-											styleClass="pull-right font-light margin-top-regular">
-											
-											<h:outputText value="#{msgs.plugin_massupload_use_home_directory}" />
-										</h:commandLink>
-									</h:form>
-								</div>
-								<div class="col-sm-6">
-									<h:form id="actionarea">
-										<p:remoteCommand name="sortFiles" actionListener="#{NavigationForm.workflowPlugin.sortFiles}" update="actionarea, :actionform"/>
-	    
-										<h:panelGroup rendered="#{NavigationForm.workflowPlugin.uploadedFiles.size() > 0}">
-											<h:commandLink title="#{msgs.plugin_massupload_startInserting}" 
-												action="#{NavigationForm.workflowPlugin.startInserting}"
-												styleClass="btn btn-green font-size-s margin-top-most pull-right">
-												<i class="fa fa-cog margin-right-5"/>
-												<h:outputText value="#{msgs.plugin_massupload_startInserting}" />
-											</h:commandLink>
-											
-											<h:commandLink title="#{msgs.abbrechen}" 
-												action="#{NavigationForm.workflowPlugin.cleanUploadFolder}"
-												styleClass="btn font-size-s margin-top-most margin-right-5 pull-right">
-												<i class="fa fa-trash margin-right-5"/>
-												<h:outputText value="#{msgs.abbrechen}" />
-											</h:commandLink>
-											
-										</h:panelGroup>
-									</h:form>
-								</div>
-							</div> -->
-							<!--  list of all rows in uploaded excelfile -->
-							<div class="row">
-								<h:panelGroup id="actionform"  styleClass="col-xs-7" >
-									<div class="box box-color box-bordered lightgrey">
-										<div class="box-title">
-											<h3>
-												<h:outputText value="test" />
-											</h3>
-										</div>
-										<div class="box-content">
-							 				<ui:repeat var="row" value="#{NavigationForm.workflowPlugin.rowList}">
-							 					<div class="row">
-													<ui:repeat var="metadatum" value="#{row.contentList}">
-														<div class="row">
-															<div class="col-xs-4">
-																<font color="#{metadatum.valid?'black':'red'}">#{metadatum.headername}</font>
-															</div>
-															<div class="col-xs-8">
-																<font color="#{metadatum.valid?'black':'red'}">#{metadatum.value==''?'[empty field]':metadatum.value}</font>
-															</div>
-														</div>
-													</ui:repeat>											
-													<hr/>
-												</div>
-											</ui:repeat>
-										</div>
-									</div>								
-								</h:panelGroup>
-								<h:panelGroup class="col-xs-5">
-									<div class="box box-color box-bordered lightgrey">
-										<div class="box-title">
-											<h3>
-												<h:outputText value="Upload area" />
-											</h3>
-										</div>
-										<div class="box-content">
-											<div class="row">
-												<div class="col-xs-5">
-													Upload Excel file
-													#{NavigationForm.workflowPlugin.rowList.size()}
-												</div>
-												<div class="col-xs-7">
-													<h:form id="uploadform" prependId="false"  >
-													 	<p:fileUpload fileUploadListener="#{NavigationForm.workflowPlugin.uploadFile}" id="upload" auto="true"
-															style="text-align:center;" mode="advanced" multiple="true" dragDropSupport="true"
-															label="#{msgs.plugin_massupload_selectFiles}" sizeLimit="1000000000000"
-															allowTypes="#{NavigationForm.workflowPlugin.allowedTypes}" 
-															oncomplete="if(this.files.length == 0) sortFiles()" 
-															update=":actionform :test"/>
-													</h:form>
-												</div>
-											</div>
-											<h:panelGroup  id="test">
-												<ui:fragment  rendered="#{NavigationForm.workflowPlugin.rowList.size() > 0}" >
-													<hr/>
-													<h:form>
-													<div class="row">
-														<div class="col-xs-5 infofield">
+									<h:panelGroup  id="processParameters">
+										<ui:fragment  rendered="#{NavigationForm.workflowPlugin.rowList.size() > 0}" >
+											<h:form>
+											<div class="process-parameters">
+												<hr/>
+												<div class="row">
+													<div class="col-xs-5">
+														<div class="process-parameters__key">
 															Batch Name
-														</div>
-														<div class="col-xs-7">
-															<h:inputText value="#{NavigationForm.workflowPlugin.batchName}" id="batchName">
-<!-- 																<f:ajax execute="@this" event= -->
-															</h:inputText>
+														</div>														
+													</div>
+													<div class="col-xs-7">
+														<div class="process-parameters__value">
+															<h:inputText value="#{NavigationForm.workflowPlugin.batchName}" id="batchName" class="form-control"></h:inputText>
 														</div>
 													</div>
-													<hr/>
-														<div class="row">
-															<div class="col-xs-5 infofield">
-																Manual metadata checking needed
-															</div>
-															
-															<div class="col-xs-7">
-																<h:selectBooleanCheckbox value="#{NavigationForm.workflowPlugin.manualCorrection}">
-																	<f:ajax execute="@this" event="change"></f:ajax>
-																</h:selectBooleanCheckbox>
-															</div>
+												</div>
+												<hr/>
+												<div class="row">
+													<div class="col-xs-5">
+														<div class="process-parameters__key">
+															Manual metadata checking needed
 														</div>
-													<hr/>
-														<div class="row">
-															<div class="col-xs-5 infofield">
-																Responsible Editor
-															</div>
-															<div class="col-xs-7">
-																<h:selectOneMenu value="#{NavigationForm.workflowPlugin.userName}" id="responsibleEditor">
-																	<f:selectItems value="#{NavigationForm.workflowPlugin.userNames}" var="process" 
-																	itemLabel="#{process}" itemValue="#{process}">
-																	</f:selectItems>
-																	<f:ajax execute="@this" event="change"></f:ajax>
-																</h:selectOneMenu>
-															</div>
+													</div>
+													
+													<div class="col-xs-7">
+														<div class="process-parameters__value">
+															<h:selectBooleanCheckbox value="#{NavigationForm.workflowPlugin.manualCorrection}">
+																<f:ajax execute="@this" event="change"></f:ajax>
+															</h:selectBooleanCheckbox>
 														</div>
-													<hr/>
-													<div class="row">
-														<div class="col-xs-5 infofield">
+													</div>
+												</div>
+												<hr/>
+												<div class="row">
+													<div class="col-xs-5">
+														<div class="process-parameters__key">
+															Responsible Editor
+														</div>
+													</div>
+													<div class="col-xs-7">
+														<div class="process-parameters__value">
+															<h:selectOneMenu value="#{NavigationForm.workflowPlugin.userName}" id="responsibleEditor" class="form-control">
+																<f:selectItems value="#{NavigationForm.workflowPlugin.userNames}" var="process" 
+																itemLabel="#{process}" itemValue="#{process}">
+																</f:selectItems>
+																<f:ajax execute="@this" event="change"></f:ajax>
+															</h:selectOneMenu>
+														</div>
+													</div>
+												</div>
+												<hr/>
+												<div class="row">
+													<div class="col-xs-5">
+														<div class="process-parameters__key">
 															Workflow to use
 														</div>
-														<div class="col-xs-7">
-															<h:selectOneMenu value="#{NavigationForm.workflowPlugin.templateName}">
+													</div>
+													<div class="col-xs-7">
+														<div class="process-parameters__value">
+															<h:selectOneMenu value="#{NavigationForm.workflowPlugin.templateName}" class="form-control">
 																<f:selectItems value="#{NavigationForm.workflowPlugin.templateNames}" var="process" 
 																itemLabel="#{process}" itemValue="#{process}">
 																</f:selectItems>
@@ -222,92 +203,28 @@
 															</h:selectOneMenu>
 														</div>
 													</div>
-													<hr/>
-													<div class="row">
-														<div class="col-xs-5">
-															#{NavigationForm.workflowPlugin.invalidFields}
-														</div>
-														<div class="col-xs-7">
-															<h:commandButton value="submit" action="#{NavigationForm.workflowPlugin.startImport()}">
-																<f:ajax render="@none" execute="@this batchName">
-																	
-																</f:ajax>
-															</h:commandButton>
-														</div>
-													</div>
-														</h:form>
-												</ui:fragment>
-											</h:panelGroup>
-										</div>
-									</div>
-								
-								</h:panelGroup>
-							</div>
-							<!--  list of all uploaded files with action buttons -->
-							<!-- 
-							<h:panelGroup id="actionform"  styleClass="col-sm-12">
-							<div class="row">
-							
-								<h:form rendered="#{NavigationForm.workflowPlugin.uploadedFiles.size() > 0}">
-										<hr style="margin-top:#{NavigationForm.workflowPlugin.finishedInserts.size() > 0?'20px':'20px'};"/>
-									
-									
-										<h:dataTable var="item" value="#{NavigationForm.workflowPlugin.uploadedFiles}" id="files"
-											styleClass="table table-hover table-nomargin dataTable table-bordered responsive"
-											style="border-right: 1px solid #ddd;">
-											
-											<h:column>
-												<f:facet name="header">
-													<h:outputText value="#{msgs.datei}" />
-												</f:facet>
-												<h:outputText value="#{item.filename}" title="#{item.file.absolutePath}" />
-											</h:column>
-											
-											<h:column>
-												<f:facet name="header">
-													<h:outputText value="#{msgs.prozess}" />
-												</f:facet>
-												<h:outputText value="#{item.processTitle == null or item.processTitle eq ''?'-':item.processTitle}" title="#{item.processFolder}" />
-											</h:column>
-											
-											<h:column>
-												<f:facet name="header">
-													<h:outputText value="#{msgs.prozesseID}" />
-												</f:facet>
-												<h:outputText value="#{item.processId eq '0'?'-':item.processId}" />
-											</h:column>
-											
-											<h:column>
-												<f:facet name="header">
-													<h:outputText value="#{msgs.arbeitsschritt}" />
-												</f:facet>
-												<h:outputText value="#{item.stepId eq '0'?'-':item.stepId}" />
-											</h:column>
-											
-											<h:column>
-												<f:facet name="header">
-													<h:outputText value="#{msgs.status}" />
-												</f:facet>
-												<h:outputText value="#{item.status}" title="#{item.statusmessage}" styleClass="badge font-size-xs #{item.status == 'OK' ? 'badge-intranda-green' : file.status == 'UNKNOWN'?'badge-intranda-orange':'badge-intranda-red'}" />
-											</h:column>
-											
-											<h:column>
-												<f:facet name="header">
-													<h:outputText value="#{msgs.description}" />
-												</f:facet>
-												<h:outputText value="#{item.statusmessage}"/>
-											</h:column>
-											
-										</h:dataTable>
-									
-									
-									
-								</h:form>
+												</div>
+											</div>
+											<hr/>
+											<div class="row">
+												<div class="col-xs-9">
+													<font color="red">#{NavigationForm.workflowPlugin.invalidFields}</font>
+												</div>
+												<div class="col-xs-3">
+													<h:commandButton type="button" class=" btn btn-success" value="Create processes" action="#{NavigationForm.workflowPlugin.startImport()}">
+														<f:ajax render="@none" execute="@this batchName">
+															
+														</f:ajax>
+													</h:commandButton>
+												</div>
+											</div>
+												</h:form>
+										</ui:fragment>
+									</h:panelGroup>
 								</div>
-							</h:panelGroup>
-							-->
-							
-						</div>
+							</div>
+						
+						</h:panelGroup>
 					</div>
 				</div>
 			</div>

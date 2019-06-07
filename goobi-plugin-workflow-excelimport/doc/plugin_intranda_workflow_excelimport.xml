@@ -1,0 +1,140 @@
+<config_plugin>
+	
+	<!-- which file types shall be allowed for uploading these -->
+	<allowed-file-extensions>/(\\.|\\/)(gif|jpe?g|png|tiff?|jp2|pdf|xls|xlsx)$/</allowed-file-extensions>
+    
+    <!-- name of the folder inside of a users home directory to use as alteranive for web upload -->
+    <user-folder-name>mass_upload</user-folder-name>
+	
+	<!-- copy images using goobi script in the background (true or false) -->
+    <copy-images-using-goobiscript>false</copy-images-using-goobiscript>
+	
+	<!-- which workflow step has to be open to allow the upload into the process -->
+	<allowed-step>Scanning</allowed-step>
+	<allowed-step>Upload</allowed-step>
+	
+	<!-- which part of the files shall be used to find the right process (prefix, suffix or complete) -->
+	<filename-part>prefix</filename-part>
+	<filename-separator>-</filename-separator>
+
+
+	<qaStepName>Quality assurance</qaStepName>
+	
+	<!-- which part of the process title shall be used to match the right process (prefix, suffix or complete) - STILL UNUSED
+	<processname-part>complete</processname-part>
+	<processname_separator>_</processname_separator>
+	 -->
+	
+
+
+	<config>
+		<!-- which workflow template shall be used -->
+		<template>*</template>
+		<!-- publication type to create -->
+		<publicationType>Collection</publicationType>
+		<!-- which digital collection to use
+	
+		<collection>General</collection>
+		 -->
+		
+		<!-- define in which row the header is written, usually 1 -->
+		<rowHeader>3</rowHeader>
+		<!-- define in which row the data starts, usually 2 -->
+		<rowDataStart>4</rowDataStart>
+		<!-- define in which row the data ends, usually 20000 -->
+		<rowDataEnd>100</rowDataEnd>
+		
+		<identifierHeaderName>Yerusha identifier (created by Yerusha)</identifierHeaderName>
+		<!-- which columns shall be mapped to which process property and to which 
+			ugh metadata column: defines the column number. The first column is 1 ugh: 
+			name of the metadata to use name: name of the property - if its missing or 
+			empty no property gets generated identifier: column where the gnd data is 
+			stored -->
+
+
+		<metadata ugh="CatalogIDDigital" headerName="Yerusha identifier (created by Yerusha)" required="true" pattern="^[A-Z]*-\\d*$"/>
+		<metadata ugh="Country" headerName="Country" required="true" list="/opt/digiverso/goobi/config/plugin_intranda_workflow_excelimport_ISO3166-1.txt" />
+		<metadata ugh="Institution" headerName="Name of institution (English)" required="true" />
+		<metadata ugh="InstitutionOfficial" headerName="Name of institution (official language)" required="true" />
+		<metadata ugh="LanguageInstitution" headerName="Language of name of institution (ISO 639-2/B)" required="true" list="/opt/digiverso/goobi/config/plugin_intranda_workflow_excelimport_ISO639-2.txt"/>
+		<metadata ugh="ContactPostal" headerName="Contact information: postal address"  required="true" />
+		<metadata ugh="ContactPhone" headerName="Contact information: phone number" required="true" pattern="^[\\d-+() ]*$"/>
+		<metadata ugh="ContactWeb" headerName="Contact information: web address" required="true" pattern="^(https?|ftp|file)://[-a-zA-Z0-9+&amp;@#/%?=~_|!:\,.;]*[-a-zA-Z0-9+&amp;@#/%=~_|]"/>
+		<metadata ugh="ContactEmail" headerName="Contact information: email" required="true" pattern="[A-Za-z]"/>
+		<metadata ugh="ReferenceNumber" headerName="Archival Reference Number" required="true" />
+		<metadata ugh="ReferenceNumberType" headerName="Type of reference number" required="true" />
+		<metadata ugh="TitleDocMain" headerName="Title (English)" required="true" />
+		<metadata ugh="TitleDocMainOfficial" headerName="Title (official language)" required="true" />
+		<metadata ugh="TitleDocMainLanguage" headerName="Language of title (ISO 639-2/B)" required="true" list="/opt/digiverso/goobi/config/plugin_intranda_workflow_excelimport_ISO639-2.txt"/>
+		<metadata ugh="CreatorYerusha" headerName="Creator /accumulator" required="true" />
+		<metadata ugh="DateOfOrigin" headerName="Date(s)" />
+		<metadata ugh="DateNote" headerName="Date note" />
+		<metadata ugh="DocLanguage" headerName="Language(s)" required="true" list="/opt/digiverso/goobi/config/plugin_intranda_workflow_excelimport_ISO639-2.txt"/>
+		<metadata ugh="Extent" headerName="Extent" required="true"/>
+		<metadata ugh="MaterialDescription" headerName="Archival material type" required="true" pattern="(Audio|Cartographic Material|Graphic Material|Photographic Images|Textual Material|Moving Images)"/>
+		<metadata ugh="MaterialDescription" headerName="Archival material type" />
+		<metadata ugh="MaterialDescription" headerName="Archival material type" />
+		<metadata ugh="Condition" headerName="Physical condition" required="true" pattern="([Gg]ood|[Pp]oor)"/>
+		<metadata ugh="ScopeContent" headerName="Scope and content" required="true" pattern="^[ \\t]*[^ \\t]+(?:[ \\t]+[^ \\t]+){400\,}[ \\t]*$" />
+		<metadata ugh="ArchivalHistory" headerName="Archival history" required="true" pattern="^[ \\t]*[^ \\t]+(?:[ \\t]+[^ \\t]+){50\,}[ \\t]*$"/>
+		<metadata ugh="AdministrativeHistory" headerName="Administrative/biographical history" required="true" pattern="^[ \\t]*[^ \\t]+(?:[ \\t]+[^ \\t]+){100\,}[ \\t]*$"/>
+		<metadata ugh="AccessLocations" headerName="Access points: locations" />
+		<metadata ugh="AccessPersons" headerName="Access points: persons/families" />
+		<metadata ugh="AccessCorporate" headerName="Access points: corporate bodies" />
+		<metadata ugh="AccessSubject" headerName="Access points: subject terms" />
+		<metadata ugh="Arrangement" headerName="System of arrangement" pattern="^[ \\t]*[^ \\t]+(?:[ \\t]+[^ \\t]+){50\,}[ \\t]*$"/>
+		<metadata ugh="AccessRestrictions" headerName="Access\, restrictions" pattern="^[ \\t]*[^ \\t]+(?:[ \\t]+[^ \\t]+){40\,}[ \\t]*$"/>
+		<metadata ugh="FindingAids" headerName="Finding aids" pattern="^[ \\t]*[^ \\t]+(?:[ \\t]+[^ \\t]+){40\,}[ \\t]*$"/>
+		<metadata ugh="FindingAidsLink" headerName="Link to finding aid" />
+		<metadata ugh="Copies" headerName="Existence and location of copies" />
+		<metadata ugh="Originals" headerName="Existence and location of originals" />
+		<metadata ugh="AuthorOfDescription" headerName="Author of the description" />
+
+
+<!--
+		<metadata ugh="" headerName="" />
+-->
+		
+
+
+
+
+<!--		<metadata ugh="CatalogIDDigital" headerName="Project Identifier*" />
+		<metadata ugh="CatalogIDSource" headerName="Internal Unique identifier" />
+		<metadata ugh="AdditionalInformation" headerName="Format*" />
+		<metadata ugh="singleDigCollection" headerName="Collection Name (English)" />
+		<metadata ugh="singleDigCollectionArabic" headerName="Collection Name (Arabic)" />
+		<metadata ugh="TitleDocMain" headerName="Title (English)*" />
+		<metadata ugh="TitleDocMainArabic" headerName="Title (Arabic)" />
+		<metadata ugh="ContentDescription" headerName="Description (English)*" />
+		<metadata ugh="ContentDescriptionArabic" headerName="Description (Arabic)" />
+		<metadata ugh="DateOfOrigin" headerName="Date - Year (English)" pattern="\\d" />
+		<metadata ugh="DateOfOriginArabic" headerName="Date - Year (Arabic)" />
+		<metadata ugh="DateOfOriginArabicMonth" headerName="Date - Month (Arabic)" />
+		<metadata ugh="SubjectLocation" headerName="Country Location*" pattern="Sudan" />
+		<metadata ugh="ExactSubjectLocation" headerName="Exact Location" />
+		<metadata ugh="DocLanguage" headerName="Language" />
+		<metadata ugh="CreatorSudan" headerName="Creator"/>
+		<metadata ugh="ContributorSudan" headerName="Contributor" />
+-->
+<!--
+		<metadata ugh="CurrentNo" headerName="" />
+		<metadata ugh="CurrentNoSorting" headerName="" />
+		<metadata ugh="InventoryNumber" headerName="" />
+		<metadata ugh="FormatSourcePrint" headerName="" />
+		<metadata ugh="AdditionalInformation" headerName="" />
+		<metadata ugh="SudanMemoryTheme" headerName="" />
+		<metadata ugh="Provenience" headerName="" />
+
+
+
+
+
+
+		<metadata ugh="" headerName="" />
+-->
+		
+
+
+	</config>
+</config_plugin>
