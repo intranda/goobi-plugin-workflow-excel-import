@@ -720,7 +720,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 				Cell cell = headerRow.getCell(i);
 				if (cell != null) {
 					cell.setCellType(CellType.STRING);
-					String value = cell.getStringCellValue();
+					String value = cell.getStringCellValue().trim();
 					headerOrder.put(value, i);
 				}
 			}
@@ -836,7 +836,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 				String value = rowMap.get(headerOrder.get(mmo.getHeaderName()));
 				datum.setValue(value);
 				if (mmo.isRequired()) {
-					if (value.isEmpty()) {
+					if (value==null || value.isEmpty()) {
 						System.out.println(
 								"field " + mmo.getHeaderName() + " in " + rowIdentifier + " is required but empty");
 						datum.setValid(false);
@@ -849,6 +849,13 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 						datum.setValid(false);
 						System.out.println(
 								"field " + mmo.getHeaderName() + " in " + rowIdentifier + " does not match pattern");
+					}
+				}
+				if(!mmo.getValidContent().isEmpty()) {
+					if(!mmo.getValidContent().contains(value)) {
+						datum.setValid(false);
+						System.out.println(
+								"field " + mmo.getHeaderName() + " in " + rowIdentifier + " not contained in List");
 					}
 				}
 				row.getContentList().add(datum);

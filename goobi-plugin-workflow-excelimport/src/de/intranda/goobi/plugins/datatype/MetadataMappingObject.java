@@ -1,6 +1,8 @@
 package de.intranda.goobi.plugins.datatype;
 
 
+import java.util.List;
+
 import lombok.Data;
 
 @Data
@@ -20,4 +22,6 @@ public class MetadataMappingObject implements Column{
     
     private boolean required;
     private String pattern;
+    
+    private List<String> validContent;
 }
