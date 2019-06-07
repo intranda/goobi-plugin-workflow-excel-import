@@ -298,13 +298,19 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 	public void startImport() {
 		setTemplateFromString();
 		prefs = processTemplate.getRegelsatz().getPreferences();
-		Batch batch = new Batch();
-		batch.setBatchName(batchName);
+		Batch batch = null;
+		if (!batchName.isEmpty()) {
+			batch = new Batch();
+			batch.setBatchName(batchName);
+		}
+
 		for (Record record : recordList) {
 			try {
 				Process process = createProcess(processTemplate, record.getId());
 				generateFiles(record, process);
-				process.setBatch(batch);
+				if (batch != null) {
+					process.setBatch(batch);
+				}
 				if (manualCorrection) {
 					UserWrapper assignedUser = getUserByName(userName);
 					if (assignedUser != null) {
@@ -332,7 +338,9 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 				e.printStackTrace();
 			}
 		}
-		ProcessManager.saveBatch(batch);
+		if (batch != null) {
+			ProcessManager.saveBatch(batch);
+		}
 
 	}
 
@@ -832,7 +840,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 						datum.setValid(false);
 					}
 				}
-				if (!mmo.getPattern().isEmpty()&& value!=null && !value.isEmpty()) {
+				if (!mmo.getPattern().isEmpty() && value != null && !value.isEmpty()) {
 					Pattern pattern = Pattern.compile(mmo.getPattern());
 					Matcher matcher = pattern.matcher(value);
 					if (!matcher.find()) {
