@@ -86,12 +86,12 @@
 							<div class="box box-color box-bordered lightgrey" >
 								<div class="box-title">
 									<h3>
-										<h:outputText value="Validation results" />
+										<h:outputText value="#{msgs.plugin_yerushaExcelImport_validationResults}" />
 									</h3>
 								</div>
 								<div class="box-content">
 									<ui:fragment rendered="#{NavigationForm.workflowPlugin.rowList == null}" style="text-align:center;">
-									<p style="text-align:center; font-size:large;">Please upload an Excel file to validate it.</p>
+									<p style="text-align:center; font-size:large;">#{msgs.plugin_yerushaExcelImport_noValidation}</p>
 									</ui:fragment>
 					 				<ui:repeat var="row" value="#{NavigationForm.workflowPlugin.rowList}">
 					 					<div class="row">
@@ -115,14 +115,13 @@
 							<div class="box box-color box-bordered orange">
 								<div class="box-title">
 									<h3>
-										<h:outputText value="Upload area" />
+										<h:outputText value="#{msgs.plugin_yerushaExcelImport_uploadArea}" />
 									</h3>
 								</div>
 								<div class="box-content">
 									<div class="row">
 										<div class="col-xs-5">
-											Upload Excel file
-											#{NavigationForm.workflowPlugin.rowList.size()}
+											#{msgs.plugin_yerushaExcelImport_UploadExcelFile}
 										</div>
 										<div class="col-xs-7">
 											<h:form id="uploadform" prependId="false"  >
@@ -143,7 +142,7 @@
 												<div class="row">
 													<div class="col-xs-5">
 														<div class="process-parameters__key">
-															Batch Name
+															#{msgs.plugin_yerushaExcelImport_batchName}
 														</div>														
 													</div>
 													<div class="col-xs-7">
@@ -156,7 +155,7 @@
 												<div class="row">
 													<div class="col-xs-5">
 														<div class="process-parameters__key">
-															Manual metadata checking needed
+														#{msgs.plugin_yerushaExcelImport_manualMetadata}
 														</div>
 													</div>
 													
@@ -172,7 +171,7 @@
 												<div class="row">
 													<div class="col-xs-5">
 														<div class="process-parameters__key">
-															Responsible Editor
+															#{msgs.plugin_yerushaExcelImport_responsbleEditor}
 														</div>
 													</div>
 													<div class="col-xs-7">
@@ -190,7 +189,7 @@
 												<div class="row">
 													<div class="col-xs-5">
 														<div class="process-parameters__key">
-															Workflow to use
+															#{msgs.plugin_yerushaExcelImport_workflow}
 														</div>
 													</div>
 													<div class="col-xs-7">

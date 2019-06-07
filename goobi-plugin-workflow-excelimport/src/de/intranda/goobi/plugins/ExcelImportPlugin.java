@@ -186,7 +186,6 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 
 	public void setTemplateName(String name) {
 		this.templateName = name;
-		System.out.println("reset userList");
 		userNames = null;
 		users = null;
 		userName = null;
@@ -199,10 +198,6 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 	public List<String> getUserNames() {
 		if (userNames == null) {
 			updateUserNameList();
-			System.out.println("initialized user List; length: " + userNames.size());
-			for (String s : userNames) {
-				System.out.println(s);
-			}
 		}
 		return userNames;
 	}
@@ -228,14 +223,12 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 			excelFile = Paths.get(uploadedFiles.get(0).getFile().getAbsolutePath());
 			recordList = generateRecordsFromFile();
 			rowList = validationTest(recordList);
-			System.out.println(rowList.size());
 			initTemplateList();
 			// TODO validate every row
 			// TODO create metadata object per row
 			// TODO get preferences for process creation from UI/config
 
 			// TODO create process per row taking preferences into account
-			System.out.println("done");
 		} catch (IOException e) {
 			log.error("Error while uploading files", e);
 		}
@@ -304,7 +297,6 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 
 	public void startImport() {
 		setTemplateFromString();
-		System.out.println(this.processTemplate.getTitel());
 		prefs = processTemplate.getRegelsatz().getPreferences();
 		Batch batch = new Batch();
 		batch.setBatchName(batchName);
@@ -837,8 +829,6 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 				datum.setValue(value);
 				if (mmo.isRequired()) {
 					if (value == null || value.isEmpty()) {
-						System.out.println(
-								"field " + mmo.getHeaderName() + " in " + rowIdentifier + " is required but empty");
 						datum.setValid(false);
 					}
 				}
@@ -847,8 +837,6 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 					Matcher matcher = pattern.matcher(value);
 					if (!matcher.find()) {
 						datum.setValid(false);
-						System.out.println(
-								"field " + mmo.getHeaderName() + " in " + rowIdentifier + " does not match pattern");
 					}
 				}
 				if (!mmo.getValidContent().isEmpty()) {
@@ -856,8 +844,6 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 					for (String v : valueList) {
 						if (!mmo.getValidContent().contains(v)) {
 							datum.setValid(false);
-							System.out.println(
-									"field " + mmo.getHeaderName() + " in " + rowIdentifier + " not contained in List");
 						}
 					}
 				}
