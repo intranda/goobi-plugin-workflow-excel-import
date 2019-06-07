@@ -847,7 +847,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 						datum.setValid(false);
 					}
 				}
-				if (!mmo.getValidContent().isEmpty()) {
+				if (!(mmo.getValidContent().isEmpty()|| value==null || value.isEmpty())) {
 					String[] valueList = value.split("; ");
 					for (String v : valueList) {
 						if (!mmo.getValidContent().contains(v)) {
