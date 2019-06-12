@@ -100,14 +100,22 @@ public class Config {
 		String docType = md.getString("@docType", "child");
 		boolean required = md.getBoolean("@required", false);
 		String pattern = md.getString("@pattern", "");
+		String eitherHeader = md.getString("@either", "");
+		String requiredHeader = md.getString("@requiredFields","");
 		String listPath = md.getString("@list");
 		ArrayList<String> validContent = new ArrayList<>();
+
 		if (listPath != null && !listPath.isEmpty()) {
 			try {
 				validContent = readFileToList(listPath);
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			}
+		}
+
+		String[] requiredHeaders = null;
+		if (requiredHeader != null) {
+			requiredHeaders = requiredHeader.split("; ");
 		}
 
 		MetadataMappingObject mmo = new MetadataMappingObject();
@@ -121,6 +129,10 @@ public class Config {
 		mmo.setRequired(required);
 		mmo.setPattern(pattern);
 		mmo.setValidContent(validContent);
+		mmo.setEitherHeader(eitherHeader);
+		if (requiredHeaders != null) {
+			mmo.setRequiredHeaders(requiredHeaders);
+		}
 		return mmo;
 	}
 

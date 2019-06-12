@@ -24,4 +24,6 @@ public class MetadataMappingObject implements Column{
     private String pattern;
     
     private List<String> validContent;
+    private String eitherHeader;
+    private String[] requiredHeaders;
 }

@@ -855,6 +855,18 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 						}
 					}
 				}
+				if(!mmo.getEitherHeader().isEmpty()) {
+					if(rowMap.get(headerOrder.get(mmo.getEitherHeader())).isEmpty() && value.isEmpty()){
+						datum.setValid(false);
+					}
+				}
+				if(!mmo.getRequiredHeaders()[0].isEmpty()) {
+					for (String requiredHeader:mmo.getRequiredHeaders()) {
+						if(rowMap.get(headerOrder.get(requiredHeader)).isEmpty()&& !value.isEmpty()) {
+							datum.setValid(false);
+						}
+					}
+				}
 				row.getContentList().add(datum);
 				if (!datum.isValid()) {
 					row.setInvalidFields(row.getInvalidFields() + 1);
