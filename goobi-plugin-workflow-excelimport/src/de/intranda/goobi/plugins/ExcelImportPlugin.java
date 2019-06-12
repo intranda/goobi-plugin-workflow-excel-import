@@ -209,6 +209,8 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 	 */
 	public void uploadFile(FileUploadEvent event) {
 		try {
+			uploadedFiles=new ArrayList<>();
+			rowList=new ArrayList<>();
 			if (tempFolder == null) {
 				tempFolder = Paths.get(ConfigurationHelper.getInstance().getTemporaryFolder(), user.getLogin());
 				if (!Files.exists(tempFolder)) {
