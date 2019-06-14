@@ -8,7 +8,6 @@ import java.util.Scanner;
 
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.SubnodeConfiguration;
-import org.jfree.util.Log;
 
 import lombok.Data;
 
@@ -21,6 +20,7 @@ public class Config {
 	private int identifierColumn;
 	private int conditionalColumn;
 	private int rowHeader;
+	private int rowIdentifier;
 	private int rowDataStart;
 	private int rowDataEnd;
 	private List<MetadataMappingObject> metadataList = new ArrayList<>();
@@ -47,6 +47,7 @@ public class Config {
 		identifierColumn = xmlConfig.getInt("/identifierColumn", 1);
 		conditionalColumn = xmlConfig.getInt("/conditionalColumn", identifierColumn);
 		identifierHeaderName = xmlConfig.getString("/identifierHeaderName", null);
+		rowIdentifier=xmlConfig.getInt("/rowIdentifier",1);
 		rowHeader = xmlConfig.getInt("/rowHeader", 1);
 		rowDataStart = xmlConfig.getInt("/rowDataStart", 2);
 		rowDataEnd = xmlConfig.getInt("/rowDataEnd", 20000);
@@ -94,7 +95,6 @@ public class Config {
 		String rulesetName = md.getString("@ugh");
 		String propertyName = md.getString("@name");
 		Integer columnNumber = md.getInteger("@column", null);
-		Integer identifierColumn = md.getInteger("@identifier", null);
 		String headerName = md.getString("@headerName", null);
 		String normdataHeaderName = md.getString("@normdataHeaderName", null);
 		String docType = md.getString("@docType", "child");
@@ -103,6 +103,7 @@ public class Config {
 		String eitherHeader = md.getString("@either", "");
 		String requiredHeader = md.getString("@requiredFields","");
 		String listPath = md.getString("@list");
+		String identifier=md.getString("@identifier");
 		ArrayList<String> validContent = new ArrayList<>();
 
 		if (listPath != null && !listPath.isEmpty()) {
@@ -120,10 +121,10 @@ public class Config {
 
 		MetadataMappingObject mmo = new MetadataMappingObject();
 		mmo.setExcelColumn(columnNumber);
-		mmo.setIdentifierColumn(identifierColumn);
 		mmo.setPropertyName(propertyName);
 		mmo.setRulesetName(rulesetName);
 		mmo.setHeaderName(headerName);
+		mmo.setIdentifier(identifier);
 		mmo.setNormdataHeaderName(normdataHeaderName);
 		mmo.setDocType(docType);
 		mmo.setRequired(required);

@@ -6,14 +6,15 @@ import java.util.List;
 import lombok.Data;
 
 @Data
-public class MetadataMappingObject implements Column{
+public class MetadataMappingObject {
 
     private String rulesetName;
     private String propertyName;
     private Integer excelColumn;
-    private Integer identifierColumn;
 
     private String headerName;
+    private String identifier;
+    private int columnNumber=-1;
 
     private String normdataHeaderName;
 
@@ -26,4 +27,5 @@ public class MetadataMappingObject implements Column{
     private List<String> validContent;
     private String eitherHeader;
     private String[] requiredHeaders;
+    
 }

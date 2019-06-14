@@ -24,6 +24,7 @@ import org.apache.commons.configuration.reloading.FileChangedReloadingStrategy;
 import org.apache.commons.configuration.tree.xpath.XPathExpressionEngine;
 import org.apache.commons.io.input.BOMInputStream;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
@@ -209,8 +210,9 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 	 */
 	public void uploadFile(FileUploadEvent event) {
 		try {
-			uploadedFiles=new ArrayList<>();
-			rowList=new ArrayList<>();
+			uploadedFiles = new ArrayList<>();
+			rowList = new ArrayList<>();
+			recordList = new ArrayList<>();
 			if (tempFolder == null) {
 				tempFolder = Paths.get(ConfigurationHelper.getInstance().getTemporaryFolder(), user.getLogin());
 				if (!Files.exists(tempFolder)) {
@@ -226,11 +228,6 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 			recordList = generateRecordsFromFile();
 			rowList = validationTest(recordList);
 			initTemplateList();
-			// TODO validate every row
-			// TODO create metadata object per row
-			// TODO get preferences for process creation from UI/config
-
-			// TODO create process per row taking preferences into account
 		} catch (IOException e) {
 			log.error("Error while uploading files", e);
 		}
@@ -330,8 +327,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.error("Error while writing metsfile of newly created process " + record.getId(), e);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -462,7 +458,6 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 		}
 
 		try (OutputStream out = Files.newOutputStream(tempFolder.resolve(fileName));) {
-//			try (OutputStream out = new FileOutputStream(new File(tempFolder, fileName));) {
 			int read = 0;
 			byte[] bytes = new byte[1024];
 			while ((read = in.read(bytes)) != -1) {
@@ -471,7 +466,6 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 			out.flush();
 			File file = new File(tempFolder.toFile(), fileName);
 			MassUploadedFile muf = new MassUploadedFile(file, fileName);
-//			assignProcess(muf, null);
 			uploadedFiles.add(muf);
 		} catch (IOException e) {
 			log.error(e);
@@ -690,7 +684,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 //			workflowTitle = form.getTemplate().getTitel();
 //		}
 
-		List<Record> recordList = new ArrayList<>();
+		List<Record> lstRecords = new ArrayList<>();
 		String idColumn = getConfig().getIdentifierHeaderName();
 		headerOrder = new HashMap<>();
 //		List<Column> columnList=new ArrayList<>();
@@ -704,32 +698,78 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 			Iterator<Row> rowIterator = sheet.rowIterator();
 
 			// get header and data row number from config first
+			int rowIdentifier = getConfig().getRowIdentifier();
 			int rowHeader = getConfig().getRowHeader();
 			int rowDataStart = getConfig().getRowDataStart();
 			int rowDataEnd = getConfig().getRowDataEnd();
 			int rowCounter = 0;
 
-			// find the header row
-			Row headerRow = null;
-			while (rowCounter < rowHeader) {
-				headerRow = rowIterator.next();
+			// find the identifier row
+			Row identfierRow = null;
+			while (rowCounter < rowIdentifier) {
+				identfierRow = rowIterator.next();
 				rowCounter++;
 			}
 
-			// read and validate the header row
-			int numberOfCells = headerRow.getLastCellNum();
+			// read and validate the identifier row
+			int numberOfCells = identfierRow.getLastCellNum();
 			for (int i = 0; i < numberOfCells; i++) {
-				Cell cell = headerRow.getCell(i);
+				Cell cell = identfierRow.getCell(i);
 				if (cell != null) {
 					cell.setCellType(CellType.STRING);
 					String value = cell.getStringCellValue().trim();
+					for (MetadataMappingObject mmo : getConfig().getMetadataList()) {
+						if (mmo.getIdentifier().equals(value)) {
+							mmo.setColumnNumber(i);
+						}
+					}
 					headerOrder.put(value, i);
+				}
+			}
+
+			// find the header row
+			if (rowIdentifier != rowHeader) {
+				// if Identifier and header are on different rows find the header row and set
+				// them for all metadata
+				Row headerRow = null;
+				while (rowCounter < rowHeader) {
+					headerRow = rowIterator.next();
+					rowCounter++;
+				}
+				for (MetadataMappingObject mmo : getConfig().getMetadataList()) {
+					if (mmo.getColumnNumber() > -1) {
+						Cell cell = headerRow.getCell(mmo.getColumnNumber());
+						if (cell != null) {
+							cell.setCellType(CellType.STRING);
+							mmo.setHeaderName(cell.getStringCellValue());
+						}
+					}
+				}
+				Map<String, MutableInt> headerOccurence = new HashMap<>();
+				for (MetadataMappingObject mmo : getConfig().getMetadataList()) {
+					if (mmo.getHeaderName() != null) {
+						if (headerOccurence.containsKey(mmo.getHeaderName())) {
+							headerOccurence.get(mmo.getHeaderName()).increment();;
+						} else {
+							headerOccurence.put(mmo.getHeaderName(), new MutableInt(1));
+						}
+					}
+				}
+				for (MetadataMappingObject mmo : getConfig().getMetadataList()) {
+					if (mmo.getHeaderName() != null && headerOccurence.get(mmo.getHeaderName()).intValue() > 1) {
+						mmo.setHeaderName(mmo.getHeaderName() +" "+ mmo.getIdentifier());
+					}
+				}
+			} else {
+				// if Identifier and header are the same, copy them
+				for (MetadataMappingObject mmo : getConfig().getMetadataList()) {
+					mmo.setHeaderName(mmo.getIdentifier());
 				}
 			}
 
 			// find out the first data row
 			while (rowCounter < rowDataStart - 1) {
-				headerRow = rowIterator.next();
+				identfierRow = rowIterator.next();
 				rowCounter++;
 			}
 
@@ -754,7 +794,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 						Record r = new Record();
 						r.setId(map.get(headerOrder.get(idColumn)));
 						r.setObject(map);
-						recordList.add(r);
+						lstRecords.add(r);
 						break;
 					}
 				}
@@ -764,7 +804,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 			log.error(e);
 		}
 
-		return recordList;
+		return lstRecords;
 	}
 
 	private String getCellContent(Row row, int cn) {
@@ -830,12 +870,12 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 			DataRow row = new DataRow();
 			@SuppressWarnings("unchecked")
 			Map<Integer, String> rowMap = (Map<Integer, String>) record.getObject();
-			String rowIdentifier = rowMap.get(headerOrder.get(config.getIdentifierHeaderName()));
+			String rowIdentifier = rowMap.get(headerOrder.get(getConfig().getIdentifierHeaderName()));
 			row.setRowIdentifier(rowIdentifier);
 			for (MetadataMappingObject mmo : getConfig().getMetadataList()) {
 				Metadatum datum = new Metadatum();
 				datum.setHeadername(mmo.getHeaderName());
-				String value = rowMap.get(headerOrder.get(mmo.getHeaderName()));
+				String value = rowMap.get(headerOrder.get(mmo.getIdentifier()));
 				datum.setValue(value);
 				if (mmo.isRequired()) {
 					if (value == null || value.isEmpty()) {
@@ -849,7 +889,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 						datum.setValid(false);
 					}
 				}
-				if (!(mmo.getValidContent().isEmpty()|| value==null || value.isEmpty())) {
+				if (!(mmo.getValidContent().isEmpty() || value == null || value.isEmpty())) {
 					String[] valueList = value.split("; ");
 					for (String v : valueList) {
 						if (!mmo.getValidContent().contains(v)) {
@@ -857,14 +897,14 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 						}
 					}
 				}
-				if(!mmo.getEitherHeader().isEmpty()) {
-					if(rowMap.get(headerOrder.get(mmo.getEitherHeader())).isEmpty() && value.isEmpty()){
+				if (!mmo.getEitherHeader().isEmpty()) {
+					if (rowMap.get(headerOrder.get(mmo.getEitherHeader())).isEmpty() && value.isEmpty()) {
 						datum.setValid(false);
 					}
 				}
-				if(!mmo.getRequiredHeaders()[0].isEmpty()) {
-					for (String requiredHeader:mmo.getRequiredHeaders()) {
-						if(rowMap.get(headerOrder.get(requiredHeader)).isEmpty()&& !value.isEmpty()) {
+				if (!mmo.getRequiredHeaders()[0].isEmpty()) {
+					for (String requiredHeader : mmo.getRequiredHeaders()) {
+						if (rowMap.get(headerOrder.get(requiredHeader)).isEmpty() && !value.isEmpty()) {
 							datum.setValid(false);
 						}
 					}
@@ -955,7 +995,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 
 			for (MetadataMappingObject mmo : getConfig().getMetadataList()) {
 
-				String value = rowMap.get(headerOrder.get(mmo.getHeaderName()));
+				String value = rowMap.get(headerOrder.get(mmo.getIdentifier()));
 				String identifier = null;
 				if (mmo.getNormdataHeaderName() != null) {
 					identifier = rowMap.get(headerOrder.get(mmo.getNormdataHeaderName()));
@@ -1040,7 +1080,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 				try {
 					MetadataGroup group = new MetadataGroup(prefs.getMetadataGroupTypeByName(gmo.getRulesetName()));
 					for (MetadataMappingObject mmo : gmo.getMetadataList()) {
-						String value = rowMap.get(headerOrder.get(mmo.getHeaderName()));
+						String value = rowMap.get(headerOrder.get(mmo.getIdentifier()));
 						Metadata md = new Metadata(prefs.getMetadataTypeByName(mmo.getRulesetName()));
 						md.setValue(value);
 						if (mmo.getNormdataHeaderName() != null) {
