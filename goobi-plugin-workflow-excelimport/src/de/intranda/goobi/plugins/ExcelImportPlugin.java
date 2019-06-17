@@ -259,12 +259,12 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 		userNames = new ArrayList<>();
 		if (step != null) {
 			if (users.isEmpty()) {
-				userNames.add("No users assigned to step");
+				userNames.add(Helper.getTranslation("plugin_yerushaExcelImport_noUser"));
 			} else {
-				userNames.add("Choose user");
+				userNames.add(Helper.getTranslation("plugin_yerushaExcelImport_chooseUser"));
 			}
 		} else {
-			userNames.add("No step with configured name found");
+			userNames.add(Helper.getTranslation("plugin_yerushaExcelImport_noStep"));
 		}
 		for (UserWrapper u : users) {
 			userNames.add(u.getUser().getNachVorname());
@@ -395,7 +395,8 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 				fields += a.getInvalidFields();
 			}
 		}
-		return String.valueOf(fields) + " invalid fields in " + rows + " rows";
+//		return String.valueOf(fields) + " invalid fields in " + rows + " rows";
+		return Helper.getTranslation("plugin_yerushaExcelImport_invalidFields", String.valueOf(fields), String.valueOf(rows));
 	}
 
 	public void sortFiles() {
