@@ -182,7 +182,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 
 	@Override
 	public String getGui() {
-		return "/uii/plugin_workflow_massupload.xhtml";
+		return "/uii/plugin_workflow_excelimport.xhtml";
 	}
 
 	public void setTemplateName(String name) {
