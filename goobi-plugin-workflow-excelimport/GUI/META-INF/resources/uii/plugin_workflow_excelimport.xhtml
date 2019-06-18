@@ -74,10 +74,10 @@
 /* 			} */
 		</style>
 
-        <h:outputText styleClass="alert alert-danger block margin-top-most" value="#{msgs.noAccessAllowed} Plugin_Goobi_Massupload" 
-        	rendered="#{!LoginForm.hasRole('Plugin_Goobi_Massupload')}"/>
+        <h:outputText styleClass="alert alert-danger block margin-top-most" value="#{msgs.noAccessAllowed} Plugin_Goobi_Workflow_ExcelImport" 
+        	rendered="#{!LoginForm.hasRole('Plugin_Goobi_Workflow_ExcelImport')}"/>
         
-        <h:panelGroup rendered="#{LoginForm.hasRole('Plugin_Goobi_Massupload')}">
+        <h:panelGroup rendered="#{LoginForm.hasRole('Plugin_Goobi_Workflow_ExcelImport')}">
 			<div class="row">
 				<div class="col-sm-12">
 					<!--  list of all rows in uploaded excelfile -->
@@ -90,15 +90,16 @@
 									</h3>
 								</div>
 								<div class="box-content">
-									<ui:fragment rendered="#{NavigationForm.workflowPlugin.rowList == null}" style="text-align:center;">
-									<p style="text-align:center; font-size:large;">#{msgs.plugin_yerushaExcelImport_noValidation}</p>
-									</ui:fragment>
+								
+									<h:outputText styleClass="alert alert-warning margin-top-10" value="#{msgs.plugin_yerushaExcelImport_noValidation}" 
+										rendered="#{NavigationForm.workflowPlugin.rowList == null}" />
+
 					 				<ui:repeat var="row" value="#{NavigationForm.workflowPlugin.rowList}">
 					 					<div class="row">
 											<ui:repeat var="metadatum" value="#{row.contentList}">
 												<div class="row">
 													<div class="col-xs-4">
-														<font color="#{metadatum.valid?'black':'red'}">#{metadatum.headername}</font>
+														<font color="#{metadatum.valid?'black':'red'}">#{metadatum.headername}:</font>
 													</div>
 													<div class="col-xs-8">
 														<font color="#{metadatum.valid?'black':'red'}">#{metadatum.value==''?'[empty field]':metadatum.value}</font>
