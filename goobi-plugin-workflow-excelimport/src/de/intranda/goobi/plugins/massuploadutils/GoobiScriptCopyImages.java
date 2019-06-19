@@ -51,7 +51,7 @@ public class GoobiScriptCopyImages extends AbstractIGoobiScript implements IGoob
         for (MassUploadedFile muf : uploadedFiles) {
             if (muf.getStatus() == MassUploadedFileStatus.OK) {
                 muf.setTransfered(false);
-                GoobiScriptResult gsr = new GoobiScriptResult(starttime + count++, command, username);
+                GoobiScriptResult gsr = new GoobiScriptResult(muf.getProcessId(),  command, username,starttime + count++);
                 gsr.setProcessTitle(muf.getProcessTitle());
                 resultList.add(gsr);
             } else {
