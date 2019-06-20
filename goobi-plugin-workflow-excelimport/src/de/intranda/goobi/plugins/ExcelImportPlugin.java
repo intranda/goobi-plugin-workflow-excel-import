@@ -185,6 +185,10 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 		return "/uii/plugin_workflow_excelimport.xhtml";
 	}
 
+	/**
+	 * Sets the variable templatename and resets userNames, users and userName, to
+	 * be used for template selection drop down menu
+	 */
 	public void setTemplateName(String name) {
 		this.templateName = name;
 		userNames = null;
@@ -196,6 +200,9 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 		this.batchName = name;
 	}
 
+	/**
+	 * loads usernames if list does not exist
+	 */
 	public List<String> getUserNames() {
 		if (userNames == null) {
 			updateUserNameList();
@@ -204,7 +211,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 	}
 
 	/**
-	 * Handle the upload of a file
+	 * Handle the upload and validation of a file
 	 * 
 	 * @param event
 	 */
@@ -234,6 +241,16 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 
 	}
 
+	/**
+	 * Loads a list of usernames assigned to the configured qaStep, adds message to
+	 * be displayed in drop down menu if step is not part of selected workflow or
+	 * has no users assigned
+	 * 
+	 */
+
+	/**
+	 * 
+	 */
 	public void updateUserNameList() {
 		setTemplateFromString();
 		Step step = getStepByName(processTemplate, qaStepName);
@@ -257,6 +274,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 		}
 
 		userNames = new ArrayList<>();
+		// add message to userNames to display as default choice
 		if (step != null) {
 			if (users.isEmpty()) {
 				userNames.add(Helper.getTranslation("plugin_yerushaExcelImport_noUser"));
@@ -271,6 +289,10 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 		}
 	}
 
+	/**
+	 * Gets user object from list by comparing passed string to user Names (format:
+	 * lastname, firstname)
+	 */
 	private UserWrapper getUserByName(String name) {
 		UserWrapper foundUser = null;
 		for (UserWrapper u : users) {
@@ -282,6 +304,9 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 		return foundUser;
 	}
 
+	/**
+	 * Gets step object by comparing passed tring to step names
+	 */
 	private Step getStepByName(Process process, String stepName) {
 		List<Step> schritteListe = process.getSchritte();
 		Step schritt = null;
@@ -294,6 +319,13 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 		return schritt;
 	}
 
+	/**
+	 * Creates processes from the records in recordList according to the parameters
+	 * set in batchname, processTemplate, manualCorrection
+	 */
+	/**
+	 * 
+	 */
 	public void startImport() {
 		setTemplateFromString();
 		prefs = processTemplate.getRegelsatz().getPreferences();
@@ -306,16 +338,21 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 		for (Record record : recordList) {
 			try {
 				Process process = createProcess(processTemplate, record.getId());
+				if (process==null) {
+					continue;
+				}
 				generateFiles(record, process);
 				if (batch != null) {
 					process.setBatch(batch);
 				}
 				if (manualCorrection) {
+					//if manual corrections are needed assign the selected user to this step, unassign everyone else
 					UserWrapper assignedUser = getUserByName(userName);
 					if (assignedUser != null) {
 						assignUserToStep(process, qaStepName, assignedUser);
 					}
 				} else {
+					// delete qa step if no manual corrections are needed
 					Step step = getStepByName(process, qaStepName);
 					if (step != null) {
 						StepManager.deleteStep(step);
@@ -342,6 +379,16 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 
 	}
 
+	/**
+	 * Assigns passed user to step with passed name in process
+	 * 
+	 */
+	/**
+	 * @param process
+	 * @param stepName
+	 * @param assignedUser
+	 * @throws DAOException
+	 */
 	private void assignUserToStep(Process process, String stepName, UserWrapper assignedUser) throws DAOException {
 		Step step = getStepByName(process, stepName);
 		for (Usergroup ug : step.getBenutzergruppen()) {
@@ -357,7 +404,11 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 	}
 
 	/**
-	 * check if a user exists in our internal list to avoid duplicates
+	 * Check if a user exists in our internal list to avoid duplicates
+	 */
+	/**
+	 * @param u
+	 * @return
 	 */
 	private boolean userExistsInList(User u) {
 		for (UserWrapper userWrapper : users) {
@@ -368,6 +419,9 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 		return false;
 	}
 
+	/**
+	 * Sets processTemplate by Templatename
+	 */
 	private void setTemplateFromString() {
 		for (Process process : getTemplateList()) {
 			if (process.getTitel().equals(templateName)) {
@@ -383,6 +437,9 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 		return templateList;
 	}
 
+	/**
+	 * Gets summary of validation errors
+	 */
 	public String getInvalidFields() {
 		int rows = 0;
 		int fields = 0;
@@ -396,13 +453,23 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 			}
 		}
 //		return String.valueOf(fields) + " invalid fields in " + rows + " rows";
-		return Helper.getTranslation("plugin_yerushaExcelImport_invalidFields", String.valueOf(fields), String.valueOf(rows));
+		return Helper.getTranslation("plugin_yerushaExcelImport_invalidFields", String.valueOf(fields),
+				String.valueOf(rows));
 	}
 
+	/**
+	 * 
+	 */
 	public void sortFiles() {
 		Collections.sort(uploadedFiles);
 	}
 
+	/**
+	 * Loads list of templates
+	 */
+	/**
+	 * @return
+	 */
 	private List<Process> initTemplateList() {
 		String sql = FilterHelper.criteriaBuilder("", true, null, null, null, true, false);
 		List<Process> templates = ProcessManager.getProcesses(null, sql);
@@ -411,6 +478,12 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 		return templates;
 	}
 
+	/**
+	 * Builds list of names of templates in templateList
+	 */
+	/**
+	 * 
+	 */
 	private void initTemplateNames() {
 		List<String> templateNamesInit = new ArrayList<>();
 		for (Process process : this.templateList) {
@@ -420,9 +493,26 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 		this.templateNames = templateNamesInit;
 	}
 
+	/**
+	 * Creates new Process from prozessVorlage with title
+	 */
+	/**
+	 * @param prozessVorlage
+	 * @param title
+	 * @return
+	 * @throws DAOException
+	 */
 	private Process createProcess(Process prozessVorlage, String title) throws DAOException {
 		Process prozessKopie = new Process();
-		prozessKopie.setTitel(title);
+		
+		// remove non-ascii characters for the sake of TIFF header limits
+        String regex = ConfigurationHelper.getInstance().getProcessTitleReplacementRegex();
+        String cleanedTitle = title.replaceAll(regex, "_");
+        if(ProcessManager.countProcessTitle(cleanedTitle)!=0) {
+        	return null;
+        	//TODO find proper exception to use here
+        }
+		prozessKopie.setTitel(cleanedTitle);
 		prozessKopie.setIstTemplate(false);
 		prozessKopie.setInAuswahllisteAnzeigen(false);
 		prozessKopie.setProjekt(prozessVorlage.getProjekt());
@@ -443,6 +533,11 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 	 * Save the uploaded file temporary in the tmp-folder inside of goobi in a
 	 * subfolder for the user
 	 * 
+	 * @param fileName
+	 * @param in
+	 * @throws IOException
+	 */
+	/**
 	 * @param fileName
 	 * @param in
 	 * @throws IOException
@@ -482,8 +577,11 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 	}
 
 	/**
-	 * do not upload the images from web UI, use images of subfolder in user home
+	 * Do not upload the images from web UI, use images of subfolder in user home
 	 * directory instead, usually called 'mass_upload'
+	 */
+	/**
+	 * 
 	 */
 	public void readFilesFromUserHomeFolder() {
 		uploadedFiles = new ArrayList<>();
@@ -521,6 +619,9 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 	/**
 	 * Cancel the entire process and delete the uploaded files
 	 */
+	/**
+	 * 
+	 */
 	public void cleanUploadFolder() {
 		for (MassUploadedFile uploadedFile : uploadedFiles) {
 			uploadedFile.getFile().delete();
@@ -532,6 +633,9 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 
 	/**
 	 * All uploaded files shall now be moved to the correct processes
+	 */
+	/**
+	 * 
 	 */
 	public void startInserting() {
 
@@ -596,9 +700,13 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 	}
 
 	/**
-	 * check for uploaded file if a correct process can be found and assigned
+	 * Check for uploaded file if a correct process can be found and assigned
 	 * 
 	 * @param uploadedFile
+	 */
+	/**
+	 * @param uploadedFile
+	 * @param searchCache
 	 */
 	private void assignProcess(MassUploadedFile uploadedFile, Map<String, List<Process>> searchCache) {
 		// get the relevant part of the file name
@@ -679,6 +787,12 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 		}
 	}
 
+	/**
+	 * Iterates over Excel file and returns contents one Record per row
+	 */
+	/**
+	 * @return
+	 */
 	public List<Record> generateRecordsFromFile() {
 
 //		if (StringUtils.isBlank(workflowTitle)) {
@@ -750,7 +864,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 				for (MetadataMappingObject mmo : getConfig().getMetadataList()) {
 					if (mmo.getHeaderName() != null) {
 						if (headerOccurence.containsKey(mmo.getHeaderName())) {
-							headerOccurence.get(mmo.getHeaderName()).increment();;
+							headerOccurence.get(mmo.getHeaderName()).increment();
 						} else {
 							headerOccurence.put(mmo.getHeaderName(), new MutableInt(1));
 						}
@@ -758,7 +872,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 				}
 				for (MetadataMappingObject mmo : getConfig().getMetadataList()) {
 					if (mmo.getHeaderName() != null && headerOccurence.get(mmo.getHeaderName()).intValue() > 1) {
-						mmo.setHeaderName(mmo.getHeaderName() +" "+ mmo.getIdentifier());
+						mmo.setHeaderName(mmo.getHeaderName() + " " + mmo.getIdentifier());
 					}
 				}
 			} else {
@@ -808,6 +922,9 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 		return lstRecords;
 	}
 
+	/**
+	 * Gets the content of the Cell in row at position cn
+	 */
 	private String getCellContent(Row row, int cn) {
 		// while (cellIterator.hasNext()) {
 		// Cell cell = cellIterator.next();
@@ -836,7 +953,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 	}
 
 	/**
-	 * checks if Config Object has been loaded, if not loads it
+	 * Checks if Config Object has been loaded, if not loads it
 	 */
 	public Config getConfig() {
 		if (config == null) {
@@ -846,7 +963,11 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 	}
 
 	/**
-	 * initializes Config object
+	 * Initializes Config object
+	 */
+	/**
+	 * @param workflowTitle
+	 * @return
 	 */
 	private Config loadConfig(String workflowTitle) {
 		XMLConfiguration xmlConfig = ConfigPlugins.getPluginConfig(getTitle());
@@ -865,6 +986,14 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 		return new Config(myconfig);
 	}
 
+	/**
+	 * Tests whether content of the records conforms to configured validation
+	 * criteria
+	 */
+	/**
+	 * @param records
+	 * @return
+	 */
 	private List<DataRow> validationTest(List<Record> records) {
 		List<DataRow> rowlist = new ArrayList<>();
 		for (Record record : records) {
@@ -878,11 +1007,13 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 				datum.setHeadername(mmo.getHeaderName());
 				String value = rowMap.get(headerOrder.get(mmo.getIdentifier()));
 				datum.setValue(value);
+				//check if value is empty but required
 				if (mmo.isRequired()) {
 					if (value == null || value.isEmpty()) {
 						datum.setValid(false);
 					}
 				}
+				//check if value matches the configured pattern
 				if (!mmo.getPattern().isEmpty() && value != null && !value.isEmpty()) {
 					Pattern pattern = Pattern.compile(mmo.getPattern());
 					Matcher matcher = pattern.matcher(value);
@@ -890,6 +1021,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 						datum.setValid(false);
 					}
 				}
+				
 				if (!(mmo.getValidContent().isEmpty() || value == null || value.isEmpty())) {
 					String[] valueList = value.split("; ");
 					for (String v : valueList) {
@@ -898,11 +1030,13 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 						}
 					}
 				}
+				//check if a configured requirement of either field having content is fullfilled
 				if (!mmo.getEitherHeader().isEmpty()) {
 					if (rowMap.get(headerOrder.get(mmo.getEitherHeader())).isEmpty() && value.isEmpty()) {
 						datum.setValid(false);
 					}
 				}
+				//check if field has content despite required field not having content
 				if (!mmo.getRequiredHeaders()[0].isEmpty()) {
 					for (String requiredHeader : mmo.getRequiredHeaders()) {
 						if (rowMap.get(headerOrder.get(requiredHeader)).isEmpty() && !value.isEmpty()) {
@@ -921,6 +1055,14 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 		return rowlist;
 	}
 
+	/**
+	 * @param record
+	 * @param process
+	 * @throws IOException
+	 * @throws InterruptedException
+	 * @throws SwapException
+	 * @throws DAOException
+	 */
 	public void generateFiles(Record record, Process process)
 			throws IOException, InterruptedException, SwapException, DAOException {
 
@@ -1193,7 +1335,6 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 		} catch (Exception e) {
 			ats = "";
 		}
-
 		return myRdf;
 	}
 
