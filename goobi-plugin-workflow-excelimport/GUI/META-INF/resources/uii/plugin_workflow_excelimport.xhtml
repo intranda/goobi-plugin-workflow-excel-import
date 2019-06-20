@@ -4,75 +4,8 @@
     </composite:interface>
 
     <composite:implementation>
+		<link rel="stylesheet" href="css/excel_import.css"></link>
 
-		 <style>
-			#upload .ui-widget-content {
-				border: none;
-			}
-			
-			#upload .ui-widget-header {
-			    background: #fff none repeat scroll 0 0;
-			}
-			
-			#upload .ui-fileupload-choose {
-			    background: #368ee0 none repeat scroll 0 0;
-			    color: #fff;
-			    text-shadow: none;
-			    border: 0 none;
-			    padding: 0.3em 1em;
-			    font-weight: 400;
-			}
-			
-			#upload .ui-fileupload-buttonbar span.ui-button .ui-button-text {
-			    padding: 0.3em 1em;
-			}
-			
-			#upload .ui-fileupload-buttonbar span.ui-button span.ui-button-icon-left {
-			    display: none;
-			}
-			
-			#upload .ui-fileupload-files {
-			    width: 100%;
-			}
-			
-			.ui-fileupload-content .ui-progressbar {
-			    width: 100px;
-			    height: 20px;
-			    margin: 0px;
-			}
-
-			#upload .ui-fileupload-files td:first-child {
-			    display: none;
-			}
-			
-			.draganddroparea {
-				border: 2px dashed silver;
-				padding-top:20px;
-				
-			}
-			
-			.bg-gray{
-				background-color: #ccc;
-			}
-			
-/* 			.process-parameters {} */
-/* 			.process-parameters .row { */
-/* 				border-bottom: 1px solid #ccc; */
-/* 			} */
-/* 			.process-parameters [class*="col-"] { */
-/* 				padding: 0; */
-/* 			} */
-/* 			.process-parameters__key, */
-/* 			.process-parameters__value { */
-/* 			} */
-/* 			.process-parameters__key { */
-/* 				padding: 15px; */
-/* 				background-color: #eee; */
-/* 			} */
-/* 			.process-parameters__value { */
-/* 				padding: 12px 15px 11px 15px; */
-/* 			} */
-		</style>
 
         <h:outputText styleClass="alert alert-danger block margin-top-most" value="#{msgs.noAccessAllowed} Plugin_Goobi_Workflow_ExcelImport" 
         	rendered="#{!LoginForm.hasRole('Plugin_Goobi_Workflow_ExcelImport')}"/>
@@ -119,7 +52,7 @@
 										<h:outputText value="#{msgs.plugin_yerushaExcelImport_uploadArea}" />
 									</h3>
 								</div>
-								<div class="box-content">
+								<div class="box-content nopadding">
 									<div class="row">
 										<div class="col-xs-5">
 											#{msgs.plugin_yerushaExcelImport_UploadExcelFile}
@@ -135,77 +68,145 @@
 											</h:form>
 										</div>
 									</div>
-									<h:panelGroup  id="processParameters">
+									
+
+								
+									<h:panelGroup  id="processParameters" styleClass="progress-parameters">
 										<ui:fragment  rendered="#{NavigationForm.workflowPlugin.rowList.size() > 0}" >
-											<h:form>
-											<div class="process-parameters">
-												<hr/>
-												<div class="row">
-													<div class="col-xs-5">
-														<div class="process-parameters__key">
-															#{msgs.plugin_yerushaExcelImport_batchName}
-														</div>														
-													</div>
-													<div class="col-xs-7">
-														<div class="process-parameters__value">
-															<h:inputText value="#{NavigationForm.workflowPlugin.batchName}" id="batchName" class="form-control"></h:inputText>
-														</div>
-													</div>
-												</div>
-												<hr/>
-												<div class="row">
-													<div class="col-xs-5">
-														<div class="process-parameters__key">
-														#{msgs.plugin_yerushaExcelImport_manualMetadata}
-														</div>
-													</div>
+											<h:form styleClass="form-horizontal form-bordered" id="processparametersForm">
+													<intranda:formInputText 
+													id="batch_name" 
+													name="titel2" 
+													label="#{msgs.plugin_yerushaExcelImport_batchName}" 
+													field="#{NavigationForm.workflowPlugin.batchName}" 
+													help="#{msgs.plugin_yerushaExcelImport_batchName_help}" 
+													fieldStyle="form-control" 
+													required="true" 
+													classLeft="col-xs-5"
+													classRight="col-xs-7"/>
 													
-													<div class="col-xs-7">
-														<div class="process-parameters__value">
-															<h:selectBooleanCheckbox value="#{NavigationForm.workflowPlugin.manualCorrection}">
-																<f:ajax execute="@this" event="change"></f:ajax>
-															</h:selectBooleanCheckbox>
-														</div>
-													</div>
-												</div>
-												<hr/>
-												<div class="row">
-													<div class="col-xs-5">
-														<div class="process-parameters__key">
-															#{msgs.plugin_yerushaExcelImport_responsbleEditor}
-														</div>
-													</div>
-													<div class="col-xs-7">
-														<div class="process-parameters__value">
-															<h:selectOneMenu value="#{NavigationForm.workflowPlugin.userName}" id="responsibleEditor" class="form-control">
-																<f:selectItems value="#{NavigationForm.workflowPlugin.userNames}" var="process" 
-																itemLabel="#{process}" itemValue="#{process}">
-																</f:selectItems>
-																<f:ajax execute="@this" event="change"></f:ajax>
-															</h:selectOneMenu>
-														</div>
-													</div>
-												</div>
-												<hr/>
-												<div class="row">
-													<div class="col-xs-5">
-														<div class="process-parameters__key">
-															#{msgs.plugin_yerushaExcelImport_workflow}
-														</div>
-													</div>
-													<div class="col-xs-7">
-														<div class="process-parameters__value">
-															<h:selectOneMenu value="#{NavigationForm.workflowPlugin.templateName}" class="form-control">
-																<f:selectItems value="#{NavigationForm.workflowPlugin.templateNames}" var="process" 
-																itemLabel="#{process}" itemValue="#{process}">
-																</f:selectItems>
-																<f:ajax execute="@this" event="change" render="responsibleEditor"></f:ajax>
-															</h:selectOneMenu>
-														</div>
-													</div>
-												</div>
-											</div>
-											<hr/>
+													<intranda:formInputCheckBoxAjax 
+													id="manualChecking"
+													label="#{msgs.plugin_yerushaExcelImport_manualMetadata}" 
+													field="#{NavigationForm.workflowPlugin.manualCorrection}" 
+													help="#{msgs.plugin_yerushaExcelImport_manualMetadata_help}" 
+													name="metadata" 
+													ajaxEvent="change" 
+													ajaxRender="processparametersForm:responsibleEditor_wrap"
+													classLeft="col-xs-5"
+													classRight="col-xs-7"/>
+													<h:panelGroup id="responsibleEditor_wrap" display="block">
+ 														<ui:fragment rendered="#{NavigationForm.workflowPlugin.manualCorrection}" > 
+															<intranda:formInputDropDownAjax 
+															id="responsibleEditor" 
+															label="#{msgs.plugin_yerushaExcelImport_responsbleEditor}" 
+															field="#{NavigationForm.workflowPlugin.userName}" 
+															help="#{msgs.plugin_yerushaExcelImport_responsbleEditor_help}" 
+															name="prioritaet" 
+															selectItems="#{NavigationForm.workflowPlugin.userNames}" 
+															fieldStyle="form-control" 
+															required="true" 
+															ajaxEvent="change"
+															ajaxRender="none"
+															var="process"
+															itemLabel="#{process}" 
+															itemValue="#{process}"
+															classLeft="col-xs-5"
+															classRight="col-xs-7"/>
+														</ui:fragment>
+													</h:panelGroup>
+													<intranda:formInputDropDownAjax 
+													id="workflow" 
+													label="#{msgs.plugin_yerushaExcelImport_workflow}" 
+													field="#{NavigationForm.workflowPlugin.templateName}" 
+													help="#{msgs.plugin_yerushaExcelImport_workflow_help}" 
+													name="prioritaet" 
+													selectItems="#{NavigationForm.workflowPlugin.templateNames}" 
+													fieldStyle="form-control" 
+													required="true" 
+													ajaxEvent="change" 
+													ajaxRender="responsibleEditor"
+													var="process" 
+													itemLabel="#{process}" 
+													itemValue="#{process}"
+													classLeft="col-xs-5"
+													classRight="col-xs-7"/>
+<!-- 											</h:form> -->
+<!-- 											<h:form> -->
+<!-- 											<div class="process-parameters"> -->
+<!-- 												<hr/> -->
+<!-- 												<div class="row"> -->
+<!-- 													<div class="col-xs-5"> -->
+<!-- 														<div class="process-parameters__key"> -->
+<!-- 															#{msgs.plugin_yerushaExcelImport_batchName} -->
+<!-- 														</div>														 -->
+<!-- 													</div> -->
+<!-- 													<div class="col-xs-7"> -->
+<!-- 														<div class="process-parameters__value"> -->
+<!-- 															<h:inputText value="#{NavigationForm.workflowPlugin.batchName}" id="batchName" class="form-control"></h:inputText> -->
+<!-- 														</div> -->
+<!-- 													</div> -->
+<!-- 												</div> -->
+<!-- 												<hr/> -->
+<!-- 												<div class="row"> -->
+<!-- 													<div class="col-xs-5"> -->
+<!-- 														<div class="process-parameters__key"> -->
+<!-- 														#{msgs.plugin_yerushaExcelImport_manualMetadata} -->
+<!-- 														</div> -->
+<!-- 													</div> -->
+													
+<!-- 													<div class="col-xs-7"> -->
+<!-- 														<div class="process-parameters__value"> -->
+<!-- 															<h:selectBooleanCheckbox value="#{NavigationForm.workflowPlugin.manualCorrection}"> -->
+<!-- 																<f:ajax execute="@this" event="change" render="responsibleEditor_wrap"></f:ajax> -->
+<!-- 															</h:selectBooleanCheckbox> -->
+<!-- 														</div> -->
+<!-- 													</div> -->
+<!-- 												</div> -->
+<!-- 												<h:panelGroup id="responsibleEditor_wrap" display="block"> -->
+<!-- 													<ui:fragment rendered="#{NavigationForm.workflowPlugin.manualCorrection}" > -->
+<!-- 														<hr/> -->
+<!-- 														<div class="row"> -->
+<!-- 															<div class="col-xs-5"> -->
+<!-- 																<div class="process-parameters__key"> -->
+<!-- 																	#{msgs.plugin_yerushaExcelImport_responsbleEditor} -->
+<!-- 																</div> -->
+<!-- 															</div> -->
+<!-- 															<div class="col-xs-7"> -->
+<!-- 																<div class="process-parameters__value"> -->
+<!-- 																	<h:selectOneMenu value="#{NavigationForm.workflowPlugin.userName}" id="responsibleEditor" class="form-control"> -->
+<!-- 																		<f:selectItems value="#{NavigationForm.workflowPlugin.userNames}" var="process"  -->
+<!-- 																		itemLabel="#{process}" itemValue="#{process}"> -->
+<!-- 																		</f:selectItems> -->
+<!-- 																		<f:ajax execute="@this" event="change"></f:ajax> -->
+<!-- 																	</h:selectOneMenu> -->
+<!-- 																</div> -->
+<!-- 															</div> -->
+<!-- 														</div> -->
+<!-- 													</ui:fragment> -->
+<!-- 													</h:panelGroup> -->
+<!-- 												<hr/> -->
+<!-- 												<div class="row"> -->
+<!-- 													<div class="col-xs-5"> -->
+<!-- 														<div class="process-parameters__key"> -->
+<!-- 															#{msgs.plugin_yerushaExcelImport_workflow} -->
+<!-- 														</div> -->
+<!-- 													</div> -->
+<!-- 													<div class="col-xs-7"> -->
+<!-- 														<div class="process-parameters__value"> -->
+<!-- 															<h:selectOneMenu value="#{NavigationForm.workflowPlugin.templateName}" class="form-control"> -->
+<!-- 																<f:selectItems value="#{NavigationForm.workflowPlugin.templateNames}" var="process"  -->
+<!-- 																itemLabel="#{process}" itemValue="#{process}"> -->
+<!-- 																</f:selectItems> -->
+<!-- 																<f:ajax execute="@this" event="change" render="responsibleEditor"></f:ajax> -->
+<!-- 															</h:selectOneMenu> -->
+<!-- 														</div> -->
+<!-- 													</div> -->
+<!-- 												</div> -->
+<!-- 											</div> -->
+
+											
+<!-- 											<hr/> -->
 											<div class="row">
 												<div class="col-xs-9">
 													<font color="red">#{NavigationForm.workflowPlugin.invalidFields}</font>
