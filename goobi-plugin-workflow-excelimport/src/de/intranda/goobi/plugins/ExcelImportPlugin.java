@@ -233,12 +233,18 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 			saveFileTemporary(upload.getFileName(), upload.getInputstream());
 			excelFile = Paths.get(uploadedFiles.get(0).getFile().getAbsolutePath());
 			recordList = generateRecordsFromFile();
-			rowList = validationTest(recordList);
+			rowList = validateMetadata(recordList);
 			initTemplateList();
 		} catch (IOException e) {
 			log.error("Error while uploading files", e);
 		}
 
+	}
+	
+	public void cancelImport() {
+		excelFile=null;
+		recordList=null;
+		rowList=null;
 	}
 
 	/**
@@ -338,7 +344,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 		for (Record record : recordList) {
 			try {
 				Process process = createProcess(processTemplate, record.getId());
-				if (process==null) {
+				if (process == null) {
 					continue;
 				}
 				generateFiles(record, process);
@@ -346,7 +352,8 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 					process.setBatch(batch);
 				}
 				if (manualCorrection) {
-					//if manual corrections are needed assign the selected user to this step, unassign everyone else
+					// if manual corrections are needed assign the selected user to this step,
+					// unassign everyone else
 					UserWrapper assignedUser = getUserByName(userName);
 					if (assignedUser != null) {
 						assignUserToStep(process, qaStepName, assignedUser);
@@ -363,14 +370,8 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 			} catch (DAOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			} catch (IOException e) {
+			} catch (IOException | InterruptedException | SwapException e) {
 				log.error("Error while writing metsfile of newly created process " + record.getId(), e);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (SwapException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			}
 		}
 		if (batch != null) {
@@ -504,14 +505,14 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 	 */
 	private Process createProcess(Process prozessVorlage, String title) throws DAOException {
 		Process prozessKopie = new Process();
-		
+
 		// remove non-ascii characters for the sake of TIFF header limits
-        String regex = ConfigurationHelper.getInstance().getProcessTitleReplacementRegex();
-        String cleanedTitle = title.replaceAll(regex, "_");
-        if(ProcessManager.countProcessTitle(cleanedTitle)!=0) {
-        	return null;
-        	//TODO find proper exception to use here
-        }
+		String regex = ConfigurationHelper.getInstance().getProcessTitleReplacementRegex();
+		String cleanedTitle = title.replaceAll(regex, "_");
+		if (ProcessManager.countProcessTitle(cleanedTitle) != 0) {
+			return null;
+			// TODO find proper exception to use here
+		}
 		prozessKopie.setTitel(cleanedTitle);
 		prozessKopie.setIstTemplate(false);
 		prozessKopie.setInAuswahllisteAnzeigen(false);
@@ -553,7 +554,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 			}
 		}
 
-		try (OutputStream out = Files.newOutputStream(tempFolder.resolve(fileName));) {
+		try (OutputStream out = Files.newOutputStream(tempFolder.resolve(fileName))) {
 			int read = 0;
 			byte[] bytes = new byte[1024];
 			while ((read = in.read(bytes)) != -1) {
@@ -994,7 +995,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 	 * @param records
 	 * @return
 	 */
-	private List<DataRow> validationTest(List<Record> records) {
+	private List<DataRow> validateMetadata(List<Record> records) {
 		List<DataRow> rowlist = new ArrayList<>();
 		for (Record record : records) {
 			DataRow row = new DataRow();
@@ -1003,47 +1004,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 			String rowIdentifier = rowMap.get(headerOrder.get(getConfig().getIdentifierHeaderName()));
 			row.setRowIdentifier(rowIdentifier);
 			for (MetadataMappingObject mmo : getConfig().getMetadataList()) {
-				Metadatum datum = new Metadatum();
-				datum.setHeadername(mmo.getHeaderName());
-				String value = rowMap.get(headerOrder.get(mmo.getIdentifier()));
-				datum.setValue(value);
-				//check if value is empty but required
-				if (mmo.isRequired()) {
-					if (value == null || value.isEmpty()) {
-						datum.setValid(false);
-					}
-				}
-				//check if value matches the configured pattern
-				if (!mmo.getPattern().isEmpty() && value != null && !value.isEmpty()) {
-					Pattern pattern = Pattern.compile(mmo.getPattern());
-					Matcher matcher = pattern.matcher(value);
-					if (!matcher.find()) {
-						datum.setValid(false);
-					}
-				}
-				
-				if (!(mmo.getValidContent().isEmpty() || value == null || value.isEmpty())) {
-					String[] valueList = value.split("; ");
-					for (String v : valueList) {
-						if (!mmo.getValidContent().contains(v)) {
-							datum.setValid(false);
-						}
-					}
-				}
-				//check if a configured requirement of either field having content is fullfilled
-				if (!mmo.getEitherHeader().isEmpty()) {
-					if (rowMap.get(headerOrder.get(mmo.getEitherHeader())).isEmpty() && value.isEmpty()) {
-						datum.setValid(false);
-					}
-				}
-				//check if field has content despite required field not having content
-				if (!mmo.getRequiredHeaders()[0].isEmpty()) {
-					for (String requiredHeader : mmo.getRequiredHeaders()) {
-						if (rowMap.get(headerOrder.get(requiredHeader)).isEmpty() && !value.isEmpty()) {
-							datum.setValid(false);
-						}
-					}
-				}
+				Metadatum datum = validateMetadatum(rowMap, mmo);
 				row.getContentList().add(datum);
 				if (!datum.isValid()) {
 					row.setInvalidFields(row.getInvalidFields() + 1);
@@ -1053,6 +1014,59 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 			rowlist.add(row);
 		}
 		return rowlist;
+	}
+
+	private Metadatum validateMetadatum(Map<Integer, String> rowMap, MetadataMappingObject mmo) {
+		Metadatum datum = new Metadatum();
+		datum.setHeadername(mmo.getHeaderName());
+		String value = rowMap.get(headerOrder.get(mmo.getIdentifier()));
+		datum.setValue(value);
+		// check if value is empty but required
+		if (mmo.isRequired()) {
+			if (value == null || value.isEmpty()) {
+				datum.setValid(false);
+				datum.getErrorMessages().add(mmo.getRequiredErrorMessage());
+			}
+		}
+		// check if value matches the configured pattern
+		if (mmo.getPattern() != null && value != null && !value.isEmpty()) {
+			Pattern pattern = mmo.getPattern();
+			Matcher matcher = pattern.matcher(value);
+			if (!matcher.find()) {
+				datum.setValid(false);
+				datum.getErrorMessages().add(mmo.getPatternErrorMessage());
+			}
+		}
+
+		if (!(mmo.getValidContent().isEmpty() || value == null || value.isEmpty())) {
+			String[] valueList = value.split("; ");
+			for (String v : valueList) {
+				if (!mmo.getValidContent().contains(v)) {
+					datum.setValid(false);
+					datum.getErrorMessages().add(mmo.getValidContentErrorMessage());
+				}
+			}
+		}
+		// check if a configured requirement of either field having content is
+		// fullfilled
+		if (!mmo.getEitherHeader().isEmpty()) {
+			if (rowMap.get(headerOrder.get(mmo.getEitherHeader())).isEmpty() && value.isEmpty()) {
+				datum.setValid(false);
+				datum.getErrorMessages().add(mmo.getEitherErrorMessage());
+			}
+		}
+		// check if field has content despite required field not having content
+		if (!mmo.getRequiredHeaders()[0].isEmpty()) {
+			for (String requiredHeader : mmo.getRequiredHeaders()) {
+				if (rowMap.get(headerOrder.get(requiredHeader)).isEmpty() && !value.isEmpty()) {
+					datum.setValid(false);
+					if (!datum.getErrorMessages().contains(mmo.getRequiredHeadersErrormessage())) {
+						datum.getErrorMessages().add(mmo.getRequiredHeadersErrormessage());
+					}
+				}
+			}
+		}
+		return datum;
 	}
 
 	/**

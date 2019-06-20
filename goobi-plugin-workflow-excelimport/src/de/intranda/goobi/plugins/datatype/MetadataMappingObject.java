@@ -2,6 +2,7 @@ package de.intranda.goobi.plugins.datatype;
 
 
 import java.util.List;
+import java.util.regex.Pattern;
 
 import lombok.Data;
 
@@ -22,10 +23,16 @@ public class MetadataMappingObject {
     
     
     private boolean required;
-    private String pattern;
+    private Pattern pattern;
     
     private List<String> validContent;
     private String eitherHeader;
     private String[] requiredHeaders;
+    
+    private String requiredErrorMessage;
+    private String patternErrorMessage;
+    private String validContentErrorMessage;
+    private String eitherErrorMessage;
+    private String requiredHeadersErrormessage;
     
 }

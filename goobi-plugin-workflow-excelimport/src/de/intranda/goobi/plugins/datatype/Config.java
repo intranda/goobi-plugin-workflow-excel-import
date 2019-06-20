@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.regex.Pattern;
 
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.SubnodeConfiguration;
@@ -47,7 +48,7 @@ public class Config {
 		identifierColumn = xmlConfig.getInt("/identifierColumn", 1);
 		conditionalColumn = xmlConfig.getInt("/conditionalColumn", identifierColumn);
 		identifierHeaderName = xmlConfig.getString("/identifierHeaderName", null);
-		rowIdentifier=xmlConfig.getInt("/rowIdentifier",1);
+		rowIdentifier = xmlConfig.getInt("/rowIdentifier", 1);
 		rowHeader = xmlConfig.getInt("/rowHeader", 1);
 		rowDataStart = xmlConfig.getInt("/rowDataStart", 2);
 		rowDataEnd = xmlConfig.getInt("/rowDataEnd", 20000);
@@ -99,11 +100,17 @@ public class Config {
 		String normdataHeaderName = md.getString("@normdataHeaderName", null);
 		String docType = md.getString("@docType", "child");
 		boolean required = md.getBoolean("@required", false);
-		String pattern = md.getString("@pattern", "");
+		String patternString = md.getString("@pattern", "");
 		String eitherHeader = md.getString("@either", "");
-		String requiredHeader = md.getString("@requiredFields","");
+		String requiredFields = md.getString("@requiredFields", "");
 		String listPath = md.getString("@list");
-		String identifier=md.getString("@identifier");
+		String identifier = md.getString("@identifier");
+
+		String requiredErrorMessage = md.getString("@requiredErrorMessage", "");
+		String patternErrorMessage = md.getString("@patternErrorMessage", "");
+		String validContentErrorMessage = md.getString("@listErrorMessage", "");
+		String eitherErrorMessage = md.getString("@eitherErrorMessage", "");
+		String requiredHeadersErrormessage = md.getString("@requiredFieldsErrormessage", "");
 		ArrayList<String> validContent = new ArrayList<>();
 
 		if (listPath != null && !listPath.isEmpty()) {
@@ -115,8 +122,12 @@ public class Config {
 		}
 
 		String[] requiredHeaders = null;
-		if (requiredHeader != null) {
-			requiredHeaders = requiredHeader.split("; ");
+		if (requiredFields != null) {
+			requiredHeaders = requiredFields.split("; ");
+		}
+		Pattern pattern = null;
+		if (!patternString.isEmpty()) {
+			pattern = Pattern.compile(patternString);
 		}
 
 		MetadataMappingObject mmo = new MetadataMappingObject();
@@ -131,6 +142,11 @@ public class Config {
 		mmo.setPattern(pattern);
 		mmo.setValidContent(validContent);
 		mmo.setEitherHeader(eitherHeader);
+		mmo.setEitherErrorMessage(eitherErrorMessage);
+		mmo.setPatternErrorMessage(patternErrorMessage);
+		mmo.setRequiredErrorMessage(requiredErrorMessage);
+		mmo.setRequiredHeadersErrormessage(requiredHeadersErrormessage);
+		mmo.setValidContentErrorMessage(validContentErrorMessage);
 		if (requiredHeaders != null) {
 			mmo.setRequiredHeaders(requiredHeaders);
 		}

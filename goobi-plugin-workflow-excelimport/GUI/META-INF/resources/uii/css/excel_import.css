@@ -47,23 +47,18 @@
 				background-color: #ccc;
 			}
 			
-/* 			.process-parameters {} */
-/* 			.process-parameters .row { */
-/* 				border-bottom: 1px solid #ccc; */
-/* 			} */
-/* 			.process-parameters [class*="col-"] { */
-/* 				padding: 0; */
-/* 			} */
-/* 			.process-parameters__key, */
-/* 			.process-parameters__value { */
-/* 			} */
-/* 			.process-parameters__key { */
-/* 				padding: 15px; */
-/* 				background-color: #eee; */
-/* 			} */
-/* 			.process-parameters__value { */
-/* 				padding: 12px 15px 11px 15px; */
-/* 			} */
+			.col-xs-5 .box-content .row{
+				padding-top: 15px;
+				padding-bottom: 15px;
+				padding-left: 15px;
+				padding-right: 15px;
+				text-align: center;
+			}
+			
+			.col-xs-5 .box-content .row .btn{
+				float:right;
+			}
+			
 			.progress-parameters .form-horizontal.form-bordered .form-group:nth-child(2) {
 				border-top: 1px solid #ddd;
 			}
