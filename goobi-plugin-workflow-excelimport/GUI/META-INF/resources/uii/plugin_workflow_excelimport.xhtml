@@ -81,7 +81,7 @@
 													field="#{NavigationForm.workflowPlugin.batchName}" 
 													help="#{msgs.plugin_yerushaExcelImport_batchName_help}" 
 													fieldStyle="form-control" 
-													required="true" 
+													required="false" 
 													classLeft="col-xs-5"
 													classRight="col-xs-7"/>
 													
@@ -125,7 +125,7 @@
 													fieldStyle="form-control" 
 													required="true" 
 													ajaxEvent="change" 
-													ajaxRender="responsibleEditor"
+													ajaxRender="processparametersForm:responsibleEditor_wrap"
 													var="process" 
 													itemLabel="#{process}" 
 													itemValue="#{process}"
@@ -136,8 +136,8 @@
 													<font color="red">#{NavigationForm.workflowPlugin.invalidFields}</font>
 												</div>
 												<div class="col-xs-7">
-													<h:commandButton type="button" class="btn btn-success" value="#{msgs.plugin_yerushaExcelImport_createProcesses}" action="#{NavigationForm.workflowPlugin.startImport()}">
-														<f:ajax render="@none" execute="@this batchName">
+													<h:commandButton id="workflowExcelImportProcessCreation" type="button" class="btn btn-success" value="#{msgs.plugin_yerushaExcelImport_createProcesses}" action="#{NavigationForm.workflowPlugin.startImport()}">
+														<f:ajax render=":processCreationResult" execute="@this batchName">
 															
 														</f:ajax>
 													</h:commandButton>
@@ -153,7 +153,9 @@
 									</h:panelGroup>
 								</div>
 							</div>
-						
+							<h:panelGroup id="processCreationResult">
+								<h:messages id="workflowExcelImportProcessCreationMessage" escape="false" errorClass="alert alert-danger" infoClass="alert alert-info" warnClass="alert" styleClass="messages" />
+							</h:panelGroup>
 						</h:panelGroup>
 					</div>
 				</div>

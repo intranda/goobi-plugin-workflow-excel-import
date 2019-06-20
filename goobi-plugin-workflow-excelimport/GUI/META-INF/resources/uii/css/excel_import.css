@@ -49,7 +49,7 @@
 			
 			.col-xs-5 .box-content .row{
 				padding-top: 15px;
-				padding-bottom: 15px;
+				padding-bottom: 23px;
 				padding-left: 15px;
 				padding-right: 15px;
 				text-align: center;
@@ -57,6 +57,10 @@
 			
 			.col-xs-5 .box-content .row .btn{
 				float:right;
+			}
+			
+			.col-xs-5 .box-content .row .col-xs-5{
+				padding-top: 11px;
 			}
 			
 			.progress-parameters .form-horizontal.form-bordered .form-group:nth-child(2) {

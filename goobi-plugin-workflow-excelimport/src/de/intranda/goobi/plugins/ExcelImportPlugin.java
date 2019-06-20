@@ -240,11 +240,11 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 		}
 
 	}
-	
+
 	public void cancelImport() {
-		excelFile=null;
-		recordList=null;
-		rowList=null;
+		excelFile = null;
+		recordList = null;
+		rowList = null;
 	}
 
 	/**
@@ -336,7 +336,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 		setTemplateFromString();
 		prefs = processTemplate.getRegelsatz().getPreferences();
 		Batch batch = null;
-		if (!batchName.isEmpty()) {
+		if (batchName != null && !batchName.isEmpty()) {
 			batch = new Batch();
 			batch.setBatchName(batchName);
 		}
@@ -355,7 +355,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 					// if manual corrections are needed assign the selected user to this step,
 					// unassign everyone else
 					UserWrapper assignedUser = getUserByName(userName);
-					if (assignedUser != null) {
+					if (assignedUser != null && process!=null) {
 						assignUserToStep(process, qaStepName, assignedUser);
 					}
 				} else {
@@ -504,12 +504,14 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 	 * @throws DAOException
 	 */
 	private Process createProcess(Process prozessVorlage, String title) throws DAOException {
+		String control = "workflowExcelImportProcessCreation";
 		Process prozessKopie = new Process();
 
 		// remove non-ascii characters for the sake of TIFF header limits
 		String regex = ConfigurationHelper.getInstance().getProcessTitleReplacementRegex();
 		String cleanedTitle = title.replaceAll(regex, "_");
 		if (ProcessManager.countProcessTitle(cleanedTitle) != 0) {
+			Helper.setFehlerMeldung(control, Helper.getTranslation("ProcessCreationErrorTitleAllreadyInUse")+" "+Helper.getTranslation("process_grid_CatalogIDDigital")+": "+cleanedTitle, "");
 			return null;
 			// TODO find proper exception to use here
 		}
@@ -525,7 +527,8 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 		this.bHelper.WerkstueckeKopieren(prozessVorlage, prozessKopie);
 		this.bHelper.EigenschaftenKopieren(prozessVorlage, prozessKopie);
 
-		ProcessManager.saveProcess(prozessKopie);
+		ProcessManager.saveProcess(prozessKopie); 
+		Helper.setMeldung(control, Helper.getTranslation("process_created")+" "+Helper.getTranslation("process_grid_CatalogIDDigital")+": "+cleanedTitle, "");
 
 		return prozessKopie;
 	}
