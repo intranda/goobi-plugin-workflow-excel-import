@@ -2309,6 +2309,7 @@
     <metadata num="*">CorporateWriterOfIntroduction</metadata>
     <metadata num="*">CorporateWriterOfPreface</metadata>
     <metadata num="*">CorporateWriterOfSupplementaryTextualContent</metadata>
+
     <metadata num="*">HostInstitution</metadata>
     <metadata num="*">IssuingBody</metadata>
     <metadata num="*">LegislativeBody</metadata>
@@ -2356,6 +2357,7 @@
     <metadata num="*" DefaultDisplay="true">Copies</metadata>
     <metadata num="*" DefaultDisplay="true">Originals</metadata>
     <metadata num="*" DefaultDisplay="true">AuthorOfDescription</metadata>
+    <metadata num="*" DefaultDisplay="true">MaterialDescription</metadata>
 	<metadata num="*" DefaultDisplay="true">CreatorYerusha</metadata>
 	<metadata num="*" DefaultDisplay="true">Country</metadata>
 	<metadata num="*" DefaultDisplay="true">DateOfOrigin</metadata>
@@ -6857,6 +6859,116 @@ Condition
         <WriteXPath>./mods:mods/mods:originInfo[1]/#mods:edition</WriteXPath>
       </Metadata>
       <!-- Subjects end -->
+      <!-- yerusha start -->
+      <Metadata>
+        <InternalName>InstitutionOfficial</InternalName>
+        <WriteXPath>./mods:mods/mods:extension/intranda:intranda/#intranda:InstitutionOfficial</WriteXPath>
+      </Metadata>
+      <Metadata>
+        <InternalName>LanguageInstitution</InternalName>
+        <WriteXPath>./mods:mods/mods:extension/intranda:intranda/#intranda:LanguageInstitution</WriteXPath>
+      </Metadata>
+      <Metadata>
+        <InternalName>ContactPostal</InternalName>
+        <WriteXPath>./mods:mods/mods:extension/intranda:intranda/#intranda:ContactPostal</WriteXPath>
+      </Metadata>
+      <Metadata>
+        <InternalName>ContactPhone</InternalName>
+        <WriteXPath>./mods:mods/mods:extension/intranda:intranda/#intranda:ContactPhone</WriteXPath>
+      </Metadata>
+      <Metadata>
+        <InternalName>ContactWeb</InternalName>
+        <WriteXPath>./mods:mods/mods:extension/intranda:intranda/#intranda:ContactWeb</WriteXPath>
+      </Metadata>
+      <Metadata>
+        <InternalName>ContactEmail</InternalName>
+        <WriteXPath>./mods:mods/mods:extension/intranda:intranda/#intranda:ContactEmail</WriteXPath>
+      </Metadata>
+      <Metadata>
+        <InternalName>ReferenceNumber</InternalName>
+        <WriteXPath>./mods:mods/mods:extension/intranda:intranda/#intranda:ReferenceNumber</WriteXPath>
+      </Metadata>
+      <Metadata>
+        <InternalName>ReferenceNumberType</InternalName>
+        <WriteXPath>./mods:mods/mods:extension/intranda:intranda/#intranda:ReferenceNumberType</WriteXPath>
+      </Metadata>
+      <Metadata>
+        <InternalName>TitleDocMainOfficial</InternalName>
+        <WriteXPath>./mods:mods/mods:extension/intranda:intranda/#intranda:TitleDocMainOfficial</WriteXPath>
+      </Metadata>
+      <Metadata>
+        <InternalName>TitleDocMainLanguage</InternalName>
+        <WriteXPath>./mods:mods/mods:extension/intranda:intranda/#intranda:TitleDocMainLanguage</WriteXPath>
+      </Metadata>
+      <Metadata>
+        <InternalName>CreatorYerusha</InternalName>
+        <WriteXPath>./mods:mods/mods:extension/intranda:intranda/#intranda:CreatorYerusha</WriteXPath>
+      </Metadata>
+      <Metadata>
+        <InternalName>DateNote</InternalName>
+        <WriteXPath>./mods:mods/mods:extension/intranda:intranda/#intranda:DateNote</WriteXPath>
+      </Metadata>
+      <Metadata>
+        <InternalName>Extent</InternalName>
+        <WriteXPath>./mods:mods/mods:extension/intranda:intranda/#intranda:Extent</WriteXPath>
+      </Metadata>
+      <Metadata>
+        <InternalName>ScopeContent</InternalName>
+        <WriteXPath>./mods:mods/mods:extension/intranda:intranda/#intranda:ScopeContent</WriteXPath>
+      </Metadata>
+      <Metadata>
+        <InternalName>ArchivalHistory</InternalName>
+        <WriteXPath>./mods:mods/mods:extension/intranda:intranda/#intranda:ArchivalHistory</WriteXPath>
+      </Metadata>
+      <Metadata>
+        <InternalName>AdministrativeHistory</InternalName>
+        <WriteXPath>./mods:mods/mods:extension/intranda:intranda/#intranda:AdministrativeHistory</WriteXPath>
+      </Metadata>
+      <Metadata>
+        <InternalName>AccessLocations</InternalName>
+        <WriteXPath>./mods:mods/mods:extension/intranda:intranda/#intranda:AccessLocations</WriteXPath>
+      </Metadata>
+      <Metadata>
+        <InternalName>AccessPersons</InternalName>
+        <WriteXPath>./mods:mods/mods:extension/intranda:intranda/#intranda:AccessPersons</WriteXPath>
+      </Metadata>
+      <Metadata>
+        <InternalName>AccessCorporate</InternalName>
+        <WriteXPath>./mods:mods/mods:extension/intranda:intranda/#intranda:AccessCorporate</WriteXPath>
+      </Metadata>
+      <Metadata>
+        <InternalName>AccessSubject</InternalName>
+        <WriteXPath>./mods:mods/mods:extension/intranda:intranda/#intranda:AccessSubject</WriteXPath>
+      </Metadata>
+      <Metadata>
+        <InternalName>Arrangement</InternalName>
+        <WriteXPath>./mods:mods/mods:extension/intranda:intranda/#intranda:Arrangement</WriteXPath>
+      </Metadata>
+      <Metadata>
+        <InternalName>AccessRestrictions</InternalName>
+        <WriteXPath>./mods:mods/mods:extension/intranda:intranda/#intranda:AccessRestrictions</WriteXPath>
+      </Metadata>
+      <Metadata>
+        <InternalName>FindingAids</InternalName>
+        <WriteXPath>./mods:mods/mods:extension/intranda:intranda/#intranda:FindingAids</WriteXPath>
+      </Metadata>
+      <Metadata>
+        <InternalName>FindingAidsLink</InternalName>
+        <WriteXPath>./mods:mods/mods:extension/intranda:intranda/#intranda:FindingAidsLink</WriteXPath>
+      </Metadata>
+      <Metadata>
+        <InternalName>Copies</InternalName>
+        <WriteXPath>./mods:mods/mods:extension/intranda:intranda/#intranda:Copies</WriteXPath>
+      </Metadata>
+      <Metadata>
+        <InternalName>Originals</InternalName>
+        <WriteXPath>./mods:mods/mods:extension/intranda:intranda/#intranda:Originals</WriteXPath>
+      </Metadata>
+      <Metadata>
+        <InternalName>AuthorOfDescription</InternalName>
+        <WriteXPath>./mods:mods/mods:extension/intranda:intranda/#intranda:AuthorOfDescription</WriteXPath>
+      </Metadata>
+<!-- yerusha end -->
       <!-- Docstructs -->
       <DocStruct>
         <InternalName>BuchspiegelVorne</InternalName>
