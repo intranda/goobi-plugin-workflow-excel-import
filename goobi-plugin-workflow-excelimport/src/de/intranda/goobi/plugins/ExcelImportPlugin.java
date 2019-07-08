@@ -301,7 +301,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 	private UserWrapper getUserByName(String name) {
 		UserWrapper foundUser = null;
 		for (UserWrapper u : users) {
-			if (name.equals(u.getUser().getNachVorname())) {
+			if (name!=null && name.equals(u.getUser().getNachVorname())) {
 				foundUser = u;
 				break;
 			}
