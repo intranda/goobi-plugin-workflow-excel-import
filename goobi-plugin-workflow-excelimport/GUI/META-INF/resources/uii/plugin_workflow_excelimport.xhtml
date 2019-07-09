@@ -17,30 +17,54 @@
 					<div class="row">
 						<h:panelGroup id="actionform"  styleClass="col-xs-7" >
 							<div class="box box-color box-bordered lightgrey" >
-								<div class="box-title">
-									<h3>
-										<h:outputText value="#{msgs.plugin_yerushaExcelImport_validationResults}" />
-									</h3>
-								</div>
+								<h:form>
+									<div class="box-title">
+										<h3>
+											<h:outputText value="#{msgs.plugin_yerushaExcelImport_validationResults}" />
+										</h3>
+										
+										<div class="actions">
+											<h:commandLink styleClass="btn btn-mini" action="#{NavigationForm.Reload}"
+												title="#{NavigationForm.uiStatus.workflow_excel_import eq 'up'?msgs.showBoxDetailsOn:msgs.showBoxDetailsOff}">
+												<i class="fa #{NavigationForm.uiStatus.workflow_excel_import eq 'down'?'fa-angle-up':'fa-angle-down'}" />
+												<f:setPropertyActionListener target="#{NavigationForm.uiStatus.workflow_excel_import}"
+													value="#{NavigationForm.uiStatus.workflow_excel_import eq 'down'?'up':'down'}" />
+											</h:commandLink>
+										</div>
+									</div>
+								</h:form>
 								<div class="box-content">
 								
-									<h:outputText styleClass="alert alert-warning margin-top-10" value="#{msgs.plugin_yerushaExcelImport_noValidation}" 
+									<h:outputText styleClass="alert alert-warning margin-top-10" style="display:block;text-align:center"
+										value="#{msgs.plugin_yerushaExcelImport_noValidation}" 
 										rendered="#{NavigationForm.workflowPlugin.rowList == null}" />
+									
 									<ui:repeat var="row" value="#{NavigationForm.workflowPlugin.rowList}">
-					 					<div class="row">
-											<ui:repeat var="metadatum" value="#{row.contentList}">
-												<div class="row" title="#{metadatum.valid?'':metadatum.errorMessages}">
-													<div class="col-xs-4">
-														<font color="#{metadatum.valid?'black':'red'}">#{metadatum.headername}:</font>
-													</div>
-													<div class="col-xs-8">
-														<font color="#{metadatum.valid?(metadatum.value==''?'silver':'black'):'red'}">#{metadatum.value==''?'- empty field -':metadatum.value}</font>
-													</div>
-												</div>
-											</ui:repeat>											
-											<hr/>
-										</div>
+					 					
+					 					<h4>#{row.rowIdentifier}</h4>
+					 					
+					 					<table class="table table-hover table-nomargin dataTable table-bordered responsive" style="margin-bottom:15px;">
+					 						<ui:repeat var="metadatum" value="#{row.contentList}">
+						 						
+						 						<ui:fragment rendered="#{NavigationForm.uiStatus.workflow_excel_import eq 'down' or !metadatum.valid}" >
+						 							<tr>
+							 							<td class="tableColumnOverflow width200">
+							 								<h:outputText title="#{metadatum.valid?'':metadatum.errorMessages}" 
+							 									styleClass="#{metadatum.valid?(metadatum.value==''?'font-light':'font-black'):'font-danger'}"
+							 									value="#{metadatum.headername}:"/>
+							 							</td>
+							 							<td>
+							 								<h:outputText title="#{metadatum.valid?'':metadatum.errorMessages}" 
+							 									styleClass="#{metadatum.valid?(metadatum.value==''?'font-light':'font-black'):'font-danger'}" 
+							 									value="#{metadatum.value==''?'- empty field -':metadatum.value}"/>
+							 							</td>
+							 						</tr>
+						 						</ui:fragment>
+					 						</ui:repeat>	
+					 					</table>
+					 					
 									</ui:repeat>
+									
 								</div>
 							</div>	
 						</h:panelGroup>
@@ -134,8 +158,10 @@
 														classRight="col-xs-7"/>
 														
 													<div class="row">
-														<div class="col-xs-5">
-															<font color="red">#{NavigationForm.workflowPlugin.invalidFields}</font>
+														<div class="col-xs-5" style="padding-top: 0px;">
+															<h:outputText styleClass="alert #{NavigationForm.workflowPlugin.numberInvalidFields > 0?'alert-danger':'alert-info'} margin-top-10"
+																style="display:block;"
+																value="#{NavigationForm.workflowPlugin.invalidFields}" />
 														</div>
 														<div class="col-xs-7">
 															<h:commandButton id="workflowExcelImportProcessCreation" type="button" class="btn btn-success font-size-s" value="#{msgs.plugin_yerushaExcelImport_createProcesses}" action="#{NavigationForm.workflowPlugin.startImport()}">

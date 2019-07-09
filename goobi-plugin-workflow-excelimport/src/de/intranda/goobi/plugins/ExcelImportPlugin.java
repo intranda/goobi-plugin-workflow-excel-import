@@ -449,6 +449,22 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 	}
 
 	/**
+	 * Gets number of invalid Fields
+	 */
+	public int getNumberInvalidFields() {
+		int fields = 0;
+		if (rowList == null || rowList.isEmpty()) {
+			return 0;
+		}
+		for (DataRow a : rowList) {
+			if (a.getInvalidFields() > 0) {
+				fields += a.getInvalidFields();
+			}
+		}
+		return fields;
+	}
+	
+	/**
 	 * 
 	 */
 	public void sortFiles() {
