@@ -250,11 +250,6 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 	 * Loads a list of usernames assigned to the configured qaStep, adds message to
 	 * be displayed in drop down menu if step is not part of selected workflow or
 	 * has no users assigned
-	 * 
-	 */
-
-	/**
-	 * 
 	 */
 	public void updateUserNameList() {
 		setTemplateFromString();
@@ -328,9 +323,6 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 	 * Creates processes from the records in recordList according to the parameters
 	 * set in batchname, processTemplate, manualCorrection
 	 */
-	/**
-	 * 
-	 */
 	public void startImport() {
 		setTemplateFromString();
 		prefs = processTemplate.getRegelsatz().getPreferences();
@@ -382,8 +374,6 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 	/**
 	 * Assigns passed user to step with passed name in process
 	 * 
-	 */
-	/**
 	 * @param process
 	 * @param stepName
 	 * @param assignedUser
@@ -405,8 +395,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 
 	/**
 	 * Check if a user exists in our internal list to avoid duplicates
-	 */
-	/**
+	 *
 	 * @param u
 	 * @return
 	 */
@@ -468,8 +457,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 
 	/**
 	 * Loads list of templates
-	 */
-	/**
+	 *
 	 * @return
 	 */
 	private List<Process> initTemplateList() {
@@ -483,9 +471,6 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 	/**
 	 * Builds list of names of templates in templateList
 	 */
-	/**
-	 * 
-	 */
 	private void initTemplateNames() {
 		List<String> lstTemplalteNames = new ArrayList<>();
 		for (Process process : this.templateList) {
@@ -497,8 +482,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 
 	/**
 	 * Creates new Process from prozessVorlage with title
-	 */
-	/**
+	 *
 	 * @param processTemplate
 	 * @param title
 	 * @return
@@ -547,11 +531,6 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 	 * @param in
 	 * @throws IOException
 	 */
-	/**
-	 * @param fileName
-	 * @param in
-	 * @throws IOException
-	 */
 	private void saveFileTemporary(String fileName, InputStream in) throws IOException {
 		if (tempFolder == null) {
 			tempFolder = Paths.get(ConfigurationHelper.getInstance().getTemporaryFolder(), user.getLogin());
@@ -589,9 +568,6 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 	/**
 	 * Cancel the entire process and delete the uploaded files
 	 */
-	/**
-	 * 
-	 */
 	public void cleanUploadFolder() {
 		for (MassUploadedFile uploadedFile : uploadedFiles) {
 			uploadedFile.getFile().delete();
@@ -603,8 +579,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 
 	/**
 	 * Iterates over Excel file and returns contents one Record per row
-	 */
-	/**
+	 *
 	 * @return
 	 */
 	public List<Record> generateRecordsFromFile() {
@@ -787,8 +762,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 
 	/**
 	 * Initializes Config object
-	 */
-	/**
+	 *
 	 * @param workflowTitle
 	 * @return
 	 */
@@ -810,8 +784,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 	/**
 	 * Tests whether content of the records conforms to configured validation
 	 * criteria
-	 */
-	/**
+	 *
 	 * @param records
 	 * @return
 	 */

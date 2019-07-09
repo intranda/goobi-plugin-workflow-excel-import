@@ -26,8 +26,7 @@
 								
 									<h:outputText styleClass="alert alert-warning margin-top-10" value="#{msgs.plugin_yerushaExcelImport_noValidation}" 
 										rendered="#{NavigationForm.workflowPlugin.rowList == null}" />
-
-					 				<ui:repeat var="row" value="#{NavigationForm.workflowPlugin.rowList}">
+									<ui:repeat var="row" value="#{NavigationForm.workflowPlugin.rowList}">
 					 					<div class="row">
 											<ui:repeat var="metadatum" value="#{row.contentList}">
 												<div class="row" title="#{metadatum.valid?'':metadatum.errorMessages}">
@@ -35,7 +34,7 @@
 														<font color="#{metadatum.valid?'black':'red'}">#{metadatum.headername}:</font>
 													</div>
 													<div class="col-xs-8">
-														<font color="#{metadatum.valid?'black':'red'}">#{metadatum.value==''?'[empty field]':metadatum.value}</font>
+														<font color="#{metadatum.valid?(metadatum.value==''?'silver':'black'):'red'}">#{metadatum.value==''?'- empty field -':metadatum.value}</font>
 													</div>
 												</div>
 											</ui:repeat>											
@@ -75,84 +74,84 @@
 											<h:form styleClass="form-horizontal form-bordered" id="processparametersForm">
 											
 													<intranda:formInputText 
-													id="batch_name" 
-													name="titel2" 
-													label="#{msgs.plugin_yerushaExcelImport_batchName}" 
-													field="#{NavigationForm.workflowPlugin.batchName}" 
-													help="#{msgs.plugin_yerushaExcelImport_batchName_help}" 
-													fieldStyle="form-control" 
-													required="false" 
-													classLeft="col-xs-5"
-													classRight="col-xs-7"/>
+														id="batch_name" 
+														name="titel2" 
+														label="#{msgs.plugin_yerushaExcelImport_batchName}" 
+														field="#{NavigationForm.workflowPlugin.batchName}" 
+														help="#{msgs.plugin_yerushaExcelImport_batchName_help}" 
+														fieldStyle="form-control" 
+														required="false" 
+														classLeft="col-xs-5"
+														classRight="col-xs-7"/>
 													
 													<intranda:formInputCheckBoxAjax 
-													id="manualChecking"
-													label="#{msgs.plugin_yerushaExcelImport_manualMetadata}" 
-													field="#{NavigationForm.workflowPlugin.manualCorrection}" 
-													help="#{msgs.plugin_yerushaExcelImport_manualMetadata_help}" 
-													name="metadata" 
-													ajaxEvent="change" 
-													ajaxRender="processparametersForm:responsibleEditor_wrap"
-													classLeft="col-xs-5"
-													classRight="col-xs-7"/>
+														id="manualChecking"
+														label="#{msgs.plugin_yerushaExcelImport_manualMetadata}" 
+														field="#{NavigationForm.workflowPlugin.manualCorrection}" 
+														help="#{msgs.plugin_yerushaExcelImport_manualMetadata_help}" 
+														name="metadata" 
+														ajaxEvent="change" 
+														ajaxRender="processparametersForm:responsibleEditor_wrap"
+														classLeft="col-xs-5"
+														classRight="col-xs-7"/>
+														
 													<h:panelGroup id="responsibleEditor_wrap" display="block">
  														<ui:fragment rendered="#{NavigationForm.workflowPlugin.manualCorrection}" > 
 															<intranda:formInputDropDownAjax 
-															id="responsibleEditor" 
-															label="#{msgs.plugin_yerushaExcelImport_responsbleEditor}" 
-															field="#{NavigationForm.workflowPlugin.userName}" 
-															help="#{msgs.plugin_yerushaExcelImport_responsbleEditor_help}" 
-															name="prioritaet" 
-															selectItems="#{NavigationForm.workflowPlugin.userNames}" 
-															fieldStyle="form-control" 
-															required="true" 
-															ajaxEvent="change"
-															ajaxRender="none"
-															var="process"
-															itemLabel="#{process}" 
-															itemValue="#{process}"
-															classLeft="col-xs-5"
-															classRight="col-xs-7"/>
+																id="responsibleEditor" 
+																label="#{msgs.plugin_yerushaExcelImport_responsbleEditor}" 
+																field="#{NavigationForm.workflowPlugin.userName}" 
+																help="#{msgs.plugin_yerushaExcelImport_responsbleEditor_help}" 
+																name="prioritaet" 
+																selectItems="#{NavigationForm.workflowPlugin.userNames}" 
+																fieldStyle="form-control" 
+																required="true" 
+																ajaxEvent="change"
+																ajaxRender="none"
+																var="process"
+																itemLabel="#{process}" 
+																itemValue="#{process}"
+																classLeft="col-xs-5"
+																classRight="col-xs-7"/>
 														</ui:fragment>
 													</h:panelGroup>
+													
 													<intranda:formInputDropDownAjax 
-													id="workflow" 
-													label="#{msgs.plugin_yerushaExcelImport_workflow}" 
-													field="#{NavigationForm.workflowPlugin.templateName}" 
-													help="#{msgs.plugin_yerushaExcelImport_workflow_help}" 
-													name="prioritaet" 
-													selectItems="#{NavigationForm.workflowPlugin.templateNames}" 
-													fieldStyle="form-control" 
-													required="true" 
-													ajaxEvent="change" 
-													ajaxRender="processparametersForm:responsibleEditor_wrap"
-													var="process" 
-													itemLabel="#{process}" 
-													itemValue="#{process}"
-													classLeft="col-xs-5"
-													classRight="col-xs-7"/>
-											<div class="row">
-												<div class="col-xs-5">
-													<font color="red">#{NavigationForm.workflowPlugin.invalidFields}</font>
-												</div>
-												<div class="col-xs-7">
-													<h:commandButton id="workflowExcelImportProcessCreation" type="button" class="btn btn-success" value="#{msgs.plugin_yerushaExcelImport_createProcesses}" action="#{NavigationForm.workflowPlugin.startImport()}">
-														<f:ajax render=":processCreationResult" execute="@this batchName">
-															
-														</f:ajax>
-													</h:commandButton>
-													<h:commandButton type="button" class="btn btn-warning" value="#{msgs.abbrechen}" action="#{NavigationForm.workflowPlugin.cancelImport()}">
-														<f:ajax execute="@this" render="processParameters actionform">
-															
-														</f:ajax>
-													</h:commandButton>
-												</div>
-											</div>
+														id="workflow" 
+														label="#{msgs.plugin_yerushaExcelImport_workflow}" 
+														field="#{NavigationForm.workflowPlugin.templateName}" 
+														help="#{msgs.plugin_yerushaExcelImport_workflow_help}" 
+														name="prioritaet" 
+														selectItems="#{NavigationForm.workflowPlugin.templateNames}" 
+														fieldStyle="form-control" 
+														required="true" 
+														ajaxEvent="change" 
+														ajaxRender="processparametersForm:responsibleEditor_wrap"
+														var="process" 
+														itemLabel="#{process}" 
+														itemValue="#{process}"
+														classLeft="col-xs-5"
+														classRight="col-xs-7"/>
+														
+													<div class="row">
+														<div class="col-xs-5">
+															<font color="red">#{NavigationForm.workflowPlugin.invalidFields}</font>
+														</div>
+														<div class="col-xs-7">
+															<h:commandButton id="workflowExcelImportProcessCreation" type="button" class="btn btn-success font-size-s" value="#{msgs.plugin_yerushaExcelImport_createProcesses}" action="#{NavigationForm.workflowPlugin.startImport()}">
+																<f:ajax render=":processCreationResult" execute="@this batchName"/>
+															</h:commandButton>
+															<h:commandButton type="button" class="btn margin-sides-10 font-size-s" value="#{msgs.abbrechen}" action="#{NavigationForm.workflowPlugin.cancelImport()}">
+																<f:ajax execute="@this" render="processParameters actionform"/>
+															</h:commandButton>
+														</div>
+													</div>
 												</h:form>
 										</ui:fragment>
 									</h:panelGroup>
 								</div>
 							</div>
+							
 							<h:panelGroup id="processCreationResult">
 								<h:messages id="workflowExcelImportProcessCreationMessage" escape="false" errorClass="alert alert-danger" infoClass="alert alert-info" warnClass="alert" styleClass="messages" />
 							</h:panelGroup>

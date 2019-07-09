@@ -32,10 +32,8 @@
 		<template>*</template>
 		<!-- publication type to create -->
 		<publicationType>Collection</publicationType>
-		<!-- which digital collection to use
-	
-		<collection>General</collection>
-		 -->
+		<!-- which digital collection to use -->
+		<collection>Yerusha</collection>
 		
 		<!-- define in which row the header is written, usually 1 -->
 		<rowHeader>3</rowHeader>
