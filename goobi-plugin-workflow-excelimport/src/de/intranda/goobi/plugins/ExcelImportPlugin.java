@@ -837,6 +837,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 		Metadatum datum = new Metadatum();
 		datum.setHeadername(mmo.getHeaderName());
 		String value = rowMap.get(headerOrder.get(mmo.getIdentifier()));
+		value=value.replaceAll("¶", "<br/><br/>");
 		datum.setValue(value);
 		// check if value is empty but required
 		if (mmo.isRequired()) {
