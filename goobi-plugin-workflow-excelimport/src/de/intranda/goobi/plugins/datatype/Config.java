@@ -113,7 +113,7 @@ public class Config {
         String validContentErrorMessage = md.getString("@listErrorMessage", "");
         String eitherErrorMessage = md.getString("@eitherErrorMessage", "");
         String requiredHeadersErrormessage = md.getString("@requiredFieldsErrormessage", "");
-        String wordcountErrormessage = md.getString("@wordcountErrormessage", "");
+        String wordcountErrormessage = md.getString("@wordcountErrorMessage", "");
         ArrayList<String> validContent = new ArrayList<>();
 
         if (listPath != null && !listPath.isEmpty()) {
