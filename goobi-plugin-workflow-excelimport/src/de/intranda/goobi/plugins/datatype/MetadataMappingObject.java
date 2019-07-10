@@ -28,11 +28,13 @@ public class MetadataMappingObject {
     private List<String> validContent;
     private String eitherHeader;
     private String[] requiredHeaders;
+    private int wordcount;
     
     private String requiredErrorMessage;
     private String patternErrorMessage;
     private String validContentErrorMessage;
     private String eitherErrorMessage;
     private String requiredHeadersErrormessage;
+    private String wordcountErrormessage;
     
 }

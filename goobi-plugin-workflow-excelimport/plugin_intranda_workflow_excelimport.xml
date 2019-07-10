@@ -94,16 +94,16 @@
 		<metadata ugh="MaterialDescription" identifier="14b" requiredFields="14a" requiredFieldsErrormessage="May only have content if 14a is filled" pattern="(^[Aa]udio$|^[Cc]artographic [Mm]aterial$|^[Gg]raphic [Mm]aterial$|^[Pp]hotographic [Ii]mages$|^[Tt]extual [Mm]aterial$|^[Mm]oving [Ii]mages$)" patternErrorMessage="Must be one of Audio\, Cartographic Material\, Graphic Material\, Photographic Images\, Textual Material\, Moving Images"/>
 		<metadata ugh="MaterialDescription" identifier="14c" requiredFields="14a; 14b" requiredFieldsErrormessage="May only have content if 14a and 14b are filled" pattern="(^[Aa]udio$|^[Cc]artographic [Mm]aterial$|^[Gg]raphic [Mm]aterial$|^[Pp]hotographic [Ii]mages$|^[Tt]extual [Mm]aterial$|^[Mm]oving [Ii]mages$)" patternErrorMessage="Must be one of Audio\, Cartographic Material\, Graphic Material\, Photographic Images\, Textual Material\, Moving Images"/>
 		<metadata ugh="Condition" identifier="15" required="true" requiredErrorMessage="Field is required" pattern="(^[Gg]ood$|^[Pp]oor$)" patternErrorMessage="Needs to be either good or poor"/>
-		<metadata ugh="ScopeContent" identifier="16" required="true" requiredErrorMessage="Field is required" pattern="^[ \\t]*[^ \\t]+(?:[ \\t]+[^ \\t]+){400\,}[ \\t]*$" patternErrorMessage="Must have at least 400 words" />
-		<metadata ugh="ArchivalHistory" identifier="17" required="true" requiredErrorMessage="Field is required" pattern="^[ \\t]*[^ \\t]+(?:[ \\t]+[^ \\t]+){50\,}[ \\t]*$" patternErrorMessage="Must have at least 50 words"/>
-		<metadata ugh="AdministrativeHistory" identifier="18" required="true" requiredErrorMessage="Field is required" pattern="^[ \\t]*[^ \\t]+(?:[ \\t]+[^ \\t]+){100\,}[ \\t]*$" patternErrorMessage="Must have at least 100 words"/>
+		<metadata ugh="ScopeContent" identifier="16" required="true" requiredErrorMessage="Field is required" wordcount="50" wordcountErrorMessage="Must have at least 50 words" />
+		<metadata ugh="ArchivalHistory" identifier="17" required="true" requiredErrorMessage="Field is required" wordcount="50" wordcountErrorMessage="Must have at least 50 words"/>
+		<metadata ugh="AdministrativeHistory" identifier="18" required="true" requiredErrorMessage="Field is required" wordcount="50" wordcountErrorMessage="Must have at least 50 words"/>
 		<metadata ugh="AccessLocations" identifier="19a" />
 		<metadata ugh="AccessPersons" identifier="19b" />
 		<metadata ugh="AccessCorporate" identifier="19c" />
 		<metadata ugh="AccessSubject" identifier="19d" />
-		<metadata ugh="Arrangement" identifier="20" pattern="^[ \\t]*[^ \\t]+(?:[ \\t]+[^ \\t]+){50\,}[ \\t]*$" patternErrorMessage="Must have at least 50 words"/>
-		<metadata ugh="AccessRestrictions" identifier="21" pattern="^[ \\t]*[^ \\t]+(?:[ \\t]+[^ \\t]+){40\,}[ \\t]*$" patternErrorMessage="Must have at least 40 words"/>
-		<metadata ugh="FindingAids" identifier="22" pattern="^[ \\t]*[^ \\t]+(?:[ \\t]+[^ \\t]+){40\,}[ \\t]*$" patternErrorMessage="Must have at least 40 words"/>
+		<metadata ugh="Arrangement" identifier="20" wordcount="50" wordcountErrorMessage="Must have at least 50 words"/>
+		<metadata ugh="AccessRestrictions" identifier="21" wordcount="50" wordcountErrorMessage="Must have at least 50 words"/>
+		<metadata ugh="FindingAids" identifier="22" wordcount="50" wordcountErrorMessage="Must have at least 50 words"/>
 		<metadata ugh="FindingAidsLink" identifier="22a" pattern="^(https?|ftp|file)://[-a-zA-Z0-9+&amp;@#/%?=~_|!:\,.;]*[-a-zA-Z0-9+&amp;@#/%=~_|]" patternErrorMessage="Must be valid web address"/>
 		<metadata ugh="Copies" identifier="23" />
 		<metadata ugh="Originals" identifier="24" />

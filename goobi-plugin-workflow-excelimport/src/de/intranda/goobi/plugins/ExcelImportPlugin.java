@@ -883,6 +883,14 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 				}
 			}
 		}
+		//check if field has the demanded wordcount
+		if(mmo.getWordcount()!=0) {
+		    String[] wordArray=value.split(" ");
+		    if(wordArray.length<mmo.getWordcount()) {
+		        datum.setValid(false);
+		        datum.getErrorMessages().add(mmo.getWordcountErrormessage());
+		    }
+		}
 		return datum;
 	}
 
