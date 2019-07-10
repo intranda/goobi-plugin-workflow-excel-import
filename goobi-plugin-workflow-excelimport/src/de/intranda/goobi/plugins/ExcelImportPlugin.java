@@ -837,7 +837,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 		Metadatum datum = new Metadatum();
 		datum.setHeadername(mmo.getHeaderName());
 		String value = rowMap.get(headerOrder.get(mmo.getIdentifier()));
-		value=value.replaceAll("¶", "<br/><br/>");
+        value=value.replaceAll("¶", "<br/><br/>");
 		datum.setValue(value);
 		// check if value is empty but required
 		if (mmo.isRequired()) {
@@ -1045,7 +1045,9 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 	private void addMetadatumToDocStruct(Map<Integer, String> rowMap, DocStruct logical, DocStruct anchor,
 			String gndURL, MetadataMappingObject mmo) {
 		String value = rowMap.get(headerOrder.get(mmo.getIdentifier()));
+        value=value.replaceAll("¶", "<br/><br/>");
 		String identifier = null;
+
 		if (mmo.getNormdataHeaderName() != null) {
 			identifier = rowMap.get(headerOrder.get(mmo.getNormdataHeaderName()));
 		}
