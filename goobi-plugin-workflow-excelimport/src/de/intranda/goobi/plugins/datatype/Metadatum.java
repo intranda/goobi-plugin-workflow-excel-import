@@ -12,4 +12,17 @@ public class Metadatum {
 	boolean valid=true;
 	List<String> errorMessages=new ArrayList<>();
 
+	
+	public String getErrorMessagesAsHtml() {
+		String html="";
+		if (errorMessages!=null) {
+			html = "<ul class=\"popoverValidationList\">";
+            for (String s : errorMessages) {
+            	html += "<li>" + s + "</li>";
+            }
+            html += "</ul>";
+		}
+		return html;
+	}
+	
 }

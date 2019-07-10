@@ -63,7 +63,7 @@
 									                            <f:passThroughAttribute name="data-toggle" value="popover" />
 									                            <f:passThroughAttribute name="data-placement" value="top" />
 									                            <f:passThroughAttribute name="data-html" value="true" />
-																<f:passThroughAttribute name="data-content" value="&lt;b class='font-status-error'&gt;#{msgs.plugin_yerushaExcelImport_validationError}:&lt;/b&gt;&lt;br/&gt;#{metadatum.errorMessages}" />
+																<f:passThroughAttribute name="data-content" value="&lt;b class='font-status-error'&gt;#{msgs.plugin_yerushaExcelImport_validationError}:&lt;/b&gt;&lt;br/&gt;#{metadatum.errorMessagesAsHtml}" />
 									                       	</h:outputText>
 									                       	
 						                                        	 									
@@ -81,7 +81,7 @@
 									                            <f:passThroughAttribute name="data-toggle" value="popover" />
 									                            <f:passThroughAttribute name="data-placement" value="top" />
 									                            <f:passThroughAttribute name="data-html" value="true" />
-																<f:passThroughAttribute name="data-content" value="&lt;b class='font-status-error'&gt;#{msgs.plugin_yerushaExcelImport_validationError}:&lt;/b&gt;&lt;br/&gt;#{metadatum.errorMessages}" />
+																<f:passThroughAttribute name="data-content" value="&lt;b class='font-status-error'&gt;#{msgs.plugin_yerushaExcelImport_validationError}:&lt;/b&gt;&lt;br/&gt;#{metadatum.errorMessagesAsHtml}" />
 									                       	</h:outputText>
 									                    
 							 							</td>
@@ -113,7 +113,7 @@
 													style="text-align:center;" mode="advanced" multiple="true" dragDropSupport="true"
 													label="#{msgs.plugin_massupload_selectFiles}" sizeLimit="1000000000000"
 													allowTypes="#{NavigationForm.workflowPlugin.allowedTypes}" 
-													oncomplete="if(this.files.length == 0) sortFiles()" 
+													oncomplete="if(this.files.length == 0) popoverUpdate()" 
 													update=":actionform :processParameters"/>
 											</h:form>
 										</div>
@@ -215,40 +215,10 @@
         </h:panelGroup>
 
 		<script>
-    		$(function() {
-    			$("[data-toggle='popover']").popover({
-    				html : true
-    			});
-    		});
-    		
-			$(document).ready(function () {
-		
-				$('[data-toggle="tooltip"]').tooltip();
+			function popoverUpdate(){
 				$('[data-toggle="popover"]').popover();
-				if ($('.popover.fade.right.in').length != 0) {
-					$('.popover.fade.right.in').remove();
-				}
-			});
-				
-			jsf.ajax.addOnEvent(function (data) {
-				var ajaxstatus = data.status; // Can be "begin", "complete" and "success"
-				switch (ajaxstatus) {
-	
-					case "success": // This is called when ajax response is successfully processed.
-						// NOOP.
-						$(function () {
-							$('[data-toggle="tooltip"]').tooltip();
-							$('[data-toggle="popover"]').popover();
-						})
-	
-						if ($('.popover.fade.right.in').length > 0) {
-							$('.popover.fade.right.in').remove();
-						}
-	
-				}
-			});
-
-	</script>
+			}
+		</script>
 		
     </composite:implementation>
 

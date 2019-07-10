@@ -72,3 +72,19 @@
 			.progress-parameters .form-horizontal.form-bordered span .form-group:last-child {
 				border-bottom: 1px solid #ddd;
 			}
+			
+			.popoverValidationList { 
+				list-style: none;
+				margin-left: 0px;
+				padding-left: 0px
+			}
+			/*
+			.popoverValidationList li { 
+			  	background-color: #5D8F99;
+			}
+			*/
+			.popoverValidationList li::before {
+    			content: '\25b8';
+    			padding-right: 1em;
+    			padding-left:0px;
+    		}
