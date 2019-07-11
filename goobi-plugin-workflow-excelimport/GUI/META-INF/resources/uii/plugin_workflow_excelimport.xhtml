@@ -135,38 +135,6 @@
 														classLeft="col-xs-5"
 														classRight="col-xs-7"/>
 													
-													<intranda:formInputCheckBoxAjax 
-														id="manualChecking"
-														label="#{msgs.plugin_yerushaExcelImport_manualMetadata}" 
-														field="#{NavigationForm.workflowPlugin.manualCorrection}" 
-														help="#{msgs.plugin_yerushaExcelImport_manualMetadata_help}" 
-														name="metadata" 
-														ajaxEvent="change" 
-														ajaxRender="processparametersForm:responsibleEditor_wrap"
-														classLeft="col-xs-5"
-														classRight="col-xs-7"/>
-														
-													<h:panelGroup id="responsibleEditor_wrap" display="block">
- 														<ui:fragment rendered="#{NavigationForm.workflowPlugin.manualCorrection}" > 
-															<intranda:formInputDropDownAjax 
-																id="responsibleEditor" 
-																label="#{msgs.plugin_yerushaExcelImport_responsbleEditor}" 
-																field="#{NavigationForm.workflowPlugin.userName}" 
-																help="#{msgs.plugin_yerushaExcelImport_responsbleEditor_help}" 
-																name="prioritaet" 
-																selectItems="#{NavigationForm.workflowPlugin.userNames}" 
-																fieldStyle="form-control" 
-																required="true" 
-																ajaxEvent="change"
-																ajaxRender="none"
-																var="process"
-																itemLabel="#{process}" 
-																itemValue="#{process}"
-																classLeft="col-xs-5"
-																classRight="col-xs-7"/>
-														</ui:fragment>
-													</h:panelGroup>
-													
 													<intranda:formInputDropDownAjax 
 														id="workflow" 
 														label="#{msgs.plugin_yerushaExcelImport_workflow}" 
@@ -177,12 +145,53 @@
 														fieldStyle="form-control" 
 														required="true" 
 														ajaxEvent="change" 
-														ajaxRender="processparametersForm:responsibleEditor_wrap"
+														ajaxRender="processparametersForm:responsibleEditor_wrap processparametersForm:manualChecking_wrap"
 														var="process" 
 														itemLabel="#{process}" 
 														itemValue="#{process}"
 														classLeft="col-xs-5"
 														classRight="col-xs-7"/>
+														
+													<h:panelGroup id="manualChecking_wrap" display="block">
+ 														<ui:fragment rendered="#{NavigationForm.workflowPlugin.templateHasQaStep()}" > 
+															<intranda:formInputCheckBoxAjax 
+																id="manualChecking"
+																label="#{msgs.plugin_yerushaExcelImport_manualMetadata}" 
+																field="#{NavigationForm.workflowPlugin.manualCorrection}" 
+																help="#{msgs.plugin_yerushaExcelImport_manualMetadata_help}" 
+																name="metadata" 
+																ajaxEvent="change" 
+																ajaxRender="processparametersForm:responsibleEditor_wrap"
+																classLeft="col-xs-5"
+																classRight="col-xs-7"/>
+														</ui:fragment>
+													</h:panelGroup>
+														
+													<h:panelGroup id="responsibleEditor_wrap" display="block">
+ 														<ui:fragment rendered="#{NavigationForm.workflowPlugin.manualCorrection}" > 
+ 															<ui:fragment rendered="#{NavigationForm.workflowPlugin.templateHasQaStep()}" > 
+ 														
+																<intranda:formInputDropDownAjax 
+																	id="responsibleEditor" 
+																	label="#{msgs.plugin_yerushaExcelImport_responsbleEditor}" 
+																	field="#{NavigationForm.workflowPlugin.userName}" 
+																	help="#{msgs.plugin_yerushaExcelImport_responsbleEditor_help}" 
+																	name="prioritaet" 
+																	selectItems="#{NavigationForm.workflowPlugin.userNames}" 
+																	fieldStyle="form-control" 
+																	required="true" 
+																	ajaxEvent="change"
+																	ajaxRender="none"
+																	var="process"
+																	itemLabel="#{process}" 
+																	itemValue="#{process}"
+																	classLeft="col-xs-5"
+																	classRight="col-xs-7"/>
+															</ui:fragment>
+														</ui:fragment>
+													</h:panelGroup>
+													
+
 														
 													<div class="row">
 														<div class="col-xs-5" style="padding-top: 0px;">

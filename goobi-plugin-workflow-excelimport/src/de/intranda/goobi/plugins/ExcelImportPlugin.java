@@ -232,6 +232,15 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
         rowList = null;
     }
 
+    public boolean templateHasQaStep() {
+        setTemplateFromString();
+        Step step=getStepByName(processTemplate, qaStepName);
+        if(step!=null) {
+            return true;
+        }
+        return false;
+    }
+
     /**
      * Loads a list of usernames assigned to the configured qaStep, adds message to be displayed in drop down menu if step is not part of selected
      * workflow or has no users assigned
