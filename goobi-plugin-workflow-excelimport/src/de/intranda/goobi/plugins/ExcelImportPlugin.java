@@ -972,7 +972,10 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
             try {
                 if (!mmo.getRulesetName().equals("DocLanguage")) {
                     Metadata md = new Metadata(prefs.getMetadataTypeByName(mmo.getRulesetName()));
-
+                    if(mmo.getRulesetName().equals("CatalogIDDigital")) {
+                        String regex = ConfigurationHelper.getInstance().getProcessTitleReplacementRegex();
+                        value = value.replaceAll(regex, "_");   
+                    }
                     md.setValue(value);
                     if (identifier != null) {
                         md.setAutorityFile("gnd", gndURL, identifier);
