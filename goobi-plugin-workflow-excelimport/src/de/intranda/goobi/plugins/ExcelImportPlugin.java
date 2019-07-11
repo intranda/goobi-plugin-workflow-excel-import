@@ -33,6 +33,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.goobi.beans.Batch;
 import org.goobi.beans.Process;
+import org.goobi.beans.Project;
 import org.goobi.beans.Step;
 import org.goobi.beans.User;
 import org.goobi.beans.Usergroup;
@@ -63,6 +64,7 @@ import de.sub.goobi.helper.exceptions.DAOException;
 import de.sub.goobi.helper.exceptions.ImportPluginException;
 import de.sub.goobi.helper.exceptions.SwapException;
 import de.sub.goobi.persistence.managers.ProcessManager;
+import de.sub.goobi.persistence.managers.ProjectManager;
 import de.sub.goobi.persistence.managers.StepManager;
 import de.unigoettingen.sub.search.opac.ConfigOpac;
 import de.unigoettingen.sub.search.opac.ConfigOpacCatalogue;
@@ -489,6 +491,15 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
     private Process createProcess(Process processTemplate, String title) throws DAOException {
         String messageIdentifier = "workflowExcelImportProcessCreation";
         Process processCopy = new Process();
+        String institutionIdentifier = getInstitutionIdentifier(title);
+        List<Project> projectList = ProjectManager.getAllProjects();
+        Project project = null;
+        for (Project p : projectList) {
+            String institutionIdentifierWithBrackets = "(" + institutionIdentifier + ")";
+            if (p.getTitel().contains(institutionIdentifierWithBrackets)) {
+                project = p;
+            }
+        }
 
         // remove non-ascii characters for the sake of TIFF header limits
         String regex = ConfigurationHelper.getInstance().getProcessTitleReplacementRegex();
@@ -505,7 +516,11 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
         processCopy.setTitel(cleanedTitle);
         processCopy.setIstTemplate(false);
         processCopy.setInAuswahllisteAnzeigen(false);
-        processCopy.setProjekt(processTemplate.getProjekt());
+        if (project != null) {
+            processCopy.setProjekt(project);
+        } else {
+            processCopy.setProjekt(processTemplate.getProjekt());
+        }
         processCopy.setRegelsatz(processTemplate.getRegelsatz());
         processCopy.setDocket(processTemplate.getDocket());
         // copy from template
@@ -520,6 +535,15 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
                 Helper.getTranslation("process_created") + " " + Helper.getTranslation("process_grid_CatalogIDDigital") + ": " + cleanedTitle, "");
 
         return processCopy;
+    }
+
+    private String getInstitutionIdentifier(String title) {
+        String[] titleParts = title.split("-| |_");
+        String institutionIdentifier = titleParts[0];
+        if (institutionIdentifier.matches("\\w*")) {
+            return institutionIdentifier;
+        }
+        return null;
     }
 
     /**
@@ -575,9 +599,10 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
     }
 
     /**
-     * Iterates over Excel file and returns contents one Record per row
+     * Iterates over Excel file and returns contents one Record per row. Also calls Methods which set headerOrder and the header name for mmo objects
+     * in the config.
      *
-     * @return
+     * @return list of Record objects
      */
     public List<Record> generateRecordsFromFile() {
 
@@ -639,14 +664,25 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
         return lstRecords;
     }
 
+    /**
+     * Gets the next row from the rowIterator, reads its contents, stores it in a map which is put into a Record object which is added to lstRecords.
+     * 
+     * @param idColumn name of the Identifier
+     * @param rowIterator Iterator Object for rows in Excel file
+     * @param rowCounter index of current row
+     * @param lstRecords List of Record object to which will only be appended
+     * @return updated rowCounter
+     */
     private int getContent(String idColumn, Iterator<Row> rowIterator, int rowCounter, List<Record> lstRecords) {
         Map<Integer, String> map = new HashMap<>();
         Row row = rowIterator.next();
         rowCounter++;
         int lastColumn = row.getLastCellNum();
+        // if row is empty, leave
         if (lastColumn == -1) {
             return rowCounter;
         }
+        // read all cells in the current row
         for (int cellNumber = 0; cellNumber < lastColumn; cellNumber++) {
             String value = getCellContent(row, cellNumber);
             map.put(cellNumber, value);
@@ -666,6 +702,12 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
         return rowCounter;
     }
 
+    /**
+     * gets the content of the field at i in the passed row and stores it in headerOrder with key i
+     * 
+     * @param identfierRow row in excelfile where the column identifiers are
+     * @param i column number
+     */
     private void readIdentifiers(Row identfierRow, int i) {
         Cell cell = identfierRow.getCell(i);
         if (cell != null) {
@@ -680,6 +722,16 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
         }
     }
 
+    /**
+     * Progresses to the row containing the Field names, sets them in the mmo objects in the config. Also checks how often a metadatum appears and
+     * appends their identifier if there are multiple occurences. Returns updated row counter
+     * 
+     * @param rowIterator Object that iterates through the excel file
+     * @param rowHeader number of the row containing the Metadata names
+     * @param rowCounter number of current row
+     * @return updated rowCounter corresponding to the state the rowIterator is in
+     * 
+     */
     private int setHeaderNames(Iterator<Row> rowIterator, int rowHeader, int rowCounter) {
         // if Identifier and header are on different rows find the header row and set
         // them for all metadata
@@ -721,6 +773,10 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 
     /**
      * Gets the content of the Cell in row at position cn
+     * 
+     * @param row the current row in the excelfile
+     * @param cn the number of the cell
+     * @return String with value of cell in excel file in row and column cn
      */
     private String getCellContent(Row row, int cn) {
         Cell cell = row.getCell(cn, MissingCellPolicy.CREATE_NULL_AS_BLANK);
@@ -771,17 +827,18 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
         try {
             myconfig = xmlConfig.configurationAt("//config");
         } catch (IllegalArgumentException e) {
-            myconfig = xmlConfig.configurationAt("//config[./template = '*']");
+            log.error("Unable to load config element from config file", e);
         }
 
         return new Config(myconfig);
     }
 
     /**
-     * Tests whether content of the records conforms to configured validation criteria
+     * Iterate through all rows of the excel file and call method to check if all fields conform to their validation criteria.
+     * 
      *
      * @param records
-     * @return
+     * @return List of row elements in the excel file
      */
     private List<DataRow> validateMetadata(List<Record> records) {
         List<DataRow> rowlist = new ArrayList<>();
@@ -806,10 +863,10 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
     }
 
     /**
-     * Checks if there are any Criteria
+     * Checks if there are any Criteria and whether the excel field fulfills them
      * 
-     * @param rowMap
-     * @param mmo
+     * @param rowMap values from excel file are in this map
+     * @param mmo this carries information on which metadatum is where and what criteria there are for it
      * @return
      */
     private Metadatum validateMetadatum(Map<Integer, String> rowMap, MetadataMappingObject mmo) {
@@ -875,6 +932,8 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
     }
 
     /**
+     * Sets basic process properties and writes them to meta.xml
+     * 
      * @param record
      * @param process
      * @throws IOException
@@ -887,7 +946,6 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
         try {
 
             Object tempObject = record.getObject();
-
             @SuppressWarnings("unchecked")
             Map<Integer, String> rowMap = (Map<Integer, String>) tempObject;
 
@@ -896,6 +954,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
             Fileformat ff = null;
             DocStruct logical = null;
             DocStruct anchor = null;
+            String catalogueIdentifier = null;
             if (!config.isUseOpac()) {
                 ff = new MetsMods(prefs);
                 digitalDocument = new DigitalDocument();
@@ -911,8 +970,8 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
                         return;
                     }
 
-                    String catalogueIdentifier = rowMap.get(headerOrder.get(config.getIdentifierHeaderName()));
-                    
+                    catalogueIdentifier = rowMap.get(headerOrder.get(config.getIdentifierHeaderName()));
+
                     String regex = ConfigurationHelper.getInstance().getProcessTitleReplacementRegex();
                     catalogueIdentifier = catalogueIdentifier.replaceAll(regex, "_");
                     if (StringUtils.isBlank(catalogueIdentifier)) {
@@ -939,13 +998,20 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
             physical.addMetadata(imagePath);
 
             // add collections if configured
+            String institutionIdentifier = null;
+            if (rowMap.get(headerOrder.get(config.getIdentifierHeaderName())) != null) {
+                institutionIdentifier = getInstitutionIdentifier(rowMap.get(headerOrder.get(config.getIdentifierHeaderName())));
+            }
             String col = getConfig().getCollection();
-            if (StringUtils.isNotBlank(col)) {
+            if (institutionIdentifier != null) {
+                Metadata mdColl = new Metadata(prefs.getMetadataTypeByName("singleDigCollection"));
+                mdColl.setValue(institutionIdentifier);
+                logical.addMetadata(mdColl);
+            } else if (StringUtils.isNotBlank(col)) {
                 Metadata mdColl = new Metadata(prefs.getMetadataTypeByName("singleDigCollection"));
                 mdColl.setValue(col);
                 logical.addMetadata(mdColl);
             }
-            // create file name for mets file
 
             // create importobject for massimport
             String gndURL = "http://d-nb.info/gnd/";
@@ -960,6 +1026,16 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
         }
     }
 
+    /**
+     * Add metadata in rowMap to process represented by logical and anchor. Metadata is sorted according to pairs in class field headerOrder, the
+     * relevant identifier is in mmo. DocLanguage and CatalogIDDigital get special treatment.
+     * 
+     * @param rowMap
+     * @param logical
+     * @param anchor
+     * @param gndURL
+     * @param mmo
+     */
     private void addMetadatumToDocStruct(Map<Integer, String> rowMap, DocStruct logical, DocStruct anchor, String gndURL, MetadataMappingObject mmo) {
         String value = rowMap.get(headerOrder.get(mmo.getIdentifier()));
         value = value.replaceAll("¶", "<br/><br/>");
@@ -970,22 +1046,8 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
         }
         if (StringUtils.isNotBlank(mmo.getRulesetName()) && StringUtils.isNotBlank(value)) {
             try {
-                if (!mmo.getRulesetName().equals("DocLanguage")) {
-                    Metadata md = new Metadata(prefs.getMetadataTypeByName(mmo.getRulesetName()));
-                    if(mmo.getRulesetName().equals("CatalogIDDigital")) {
-                        String regex = ConfigurationHelper.getInstance().getProcessTitleReplacementRegex();
-                        value = value.replaceAll(regex, "_");   
-                    }
-                    md.setValue(value);
-                    if (identifier != null) {
-                        md.setAutorityFile("gnd", gndURL, identifier);
-                    }
-                    if (anchor != null && "anchor".equals(mmo.getDocType())) {
-                        anchor.addMetadata(md);
-                    } else {
-                        logical.addMetadata(md);
-                    }
-                } else {
+                // DocLanguage needs special treatment as their might be several languages in the field that need to be separated
+                if (mmo.getRulesetName().equals("DocLanguage")) {
                     String[] valueList = value.split("; ");
                     for (String language : valueList) {
 
@@ -1000,6 +1062,23 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
                         } else {
                             logical.addMetadata(md);
                         }
+                    }
+                } else {
+                    Metadata md = new Metadata(prefs.getMetadataTypeByName(mmo.getRulesetName()));
+                    // check if CatalogIDDigital has any disallowed characters, if so replace them with _
+                    if (mmo.getRulesetName().equals("CatalogIDDigital")) {
+                        String regex = ConfigurationHelper.getInstance().getProcessTitleReplacementRegex();
+                        value = value.replaceAll(regex, "_");
+                    }
+                    // all other Metadata are added here
+                    md.setValue(value);
+                    if (identifier != null) {
+                        md.setAutorityFile("gnd", gndURL, identifier);
+                    }
+                    if (anchor != null && "anchor".equals(mmo.getDocType())) {
+                        anchor.addMetadata(md);
+                    } else {
+                        logical.addMetadata(md);
                     }
                 }
             } catch (MetadataTypeNotAllowedException e) {
