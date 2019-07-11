@@ -49,10 +49,8 @@ import org.primefaces.model.UploadedFile;
 
 import de.intranda.goobi.plugins.datatype.Config;
 import de.intranda.goobi.plugins.datatype.DataRow;
-import de.intranda.goobi.plugins.datatype.GroupMappingObject;
 import de.intranda.goobi.plugins.datatype.MetadataMappingObject;
 import de.intranda.goobi.plugins.datatype.Metadatum;
-import de.intranda.goobi.plugins.datatype.PersonMappingObject;
 import de.intranda.goobi.plugins.datatype.UserWrapper;
 import de.intranda.goobi.plugins.massuploadutils.MassUploadedFile;
 import de.intranda.goobi.plugins.massuploadutils.MassUploadedProcess;
@@ -76,8 +74,6 @@ import ugh.dl.DocStruct;
 import ugh.dl.DocStructType;
 import ugh.dl.Fileformat;
 import ugh.dl.Metadata;
-import ugh.dl.MetadataGroup;
-import ugh.dl.Person;
 import ugh.dl.Prefs;
 import ugh.exceptions.MetadataTypeNotAllowedException;
 import ugh.exceptions.PreferencesException;
@@ -137,17 +133,11 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
      */
     @SuppressWarnings("unchecked")
     public ExcelImportPlugin() {
-        log.info("Mass upload plugin started");
+        log.info("Excel Import Plugin started");
         allowedTypes = ConfigPlugins.getPluginConfig(PLUGIN_NAME).getString("allowed-file-extensions", "/(\\.|\\/)(gif|jpe?g|png|tiff?|jp2|pdf)$/");
         filenamePart = ConfigPlugins.getPluginConfig(PLUGIN_NAME).getString("filename-part", "prefix").toLowerCase();
         userFolderName = ConfigPlugins.getPluginConfig(PLUGIN_NAME).getString("user-folder-name", "mass_upload").toLowerCase();
         filenameSeparator = ConfigPlugins.getPluginConfig(PLUGIN_NAME).getString("filename-separator", "_").toLowerCase();
-        // processnamePart =
-        // ConfigPlugins.getPluginConfig(this).getString("processname-part",
-        // "complete").toLowerCase();
-        // processnameSeparator =
-        // ConfigPlugins.getPluginConfig(this).getString("processname-separator",
-        // "_").toLowerCase();
         stepTitles = ConfigPlugins.getPluginConfig(PLUGIN_NAME).getList("allowed-step");
         qaStepName = ConfigPlugins.getPluginConfig(PLUGIN_NAME).getString("qaStepName");
         copyImagesViaGoobiScript = ConfigPlugins.getPluginConfig(PLUGIN_NAME).getBoolean("copy-images-using-goobiscript", false);
@@ -297,7 +287,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
     }
 
     /**
-     * Gets step object by comparing passed tring to step names
+     * Gets step object by comparing passed String to step names
      */
     private Step getStepByName(Process process, String stepName) {
         List<Step> schritteListe = process.getSchritte();
@@ -317,6 +307,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
     public void startImport() {
         setTemplateFromString();
         prefs = processTemplate.getRegelsatz().getPreferences();
+        // if batchname is set create a new batch to add processes to
         Batch batch = null;
         if (batchName != null && !batchName.isEmpty()) {
             batch = new Batch();
@@ -325,6 +316,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 
         for (Record record : recordList) {
             try {
+                // create new process
                 Process process = createProcess(processTemplate, record.getId());
                 if (process == null) {
                     continue;
@@ -349,10 +341,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
                 }
                 ProcessManager.saveProcess(process);
 
-            } catch (DAOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (IOException | InterruptedException | SwapException e) {
+            } catch (IOException | InterruptedException | SwapException | DAOException e) {
                 log.error("Error while writing metsfile of newly created process " + record.getId(), e);
             }
         }
@@ -371,7 +360,9 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
      * @throws DAOException
      */
     private void assignUserToStep(Process process, String stepName, UserWrapper assignedUser) throws DAOException {
+        //get step by name
         Step step = getStepByName(process, stepName);
+        // remove all assigned users
         for (Usergroup userGroup : step.getBenutzergruppen()) {
             StepManager.removeUsergroupFromStep(step, userGroup);
         }
@@ -380,6 +371,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
         }
         step.setBenutzer(new ArrayList<User>());
         step.setBenutzergruppen(new ArrayList<Usergroup>());
+        // add back only the configured user
         step.getBenutzer().add(assignedUser.getUser());
         StepManager.saveStep(step);
     }
@@ -509,13 +501,14 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
             return null;
             // TODO find proper exception to use here
         }
+        // set basic process properties
         processCopy.setTitel(cleanedTitle);
         processCopy.setIstTemplate(false);
         processCopy.setInAuswahllisteAnzeigen(false);
         processCopy.setProjekt(processTemplate.getProjekt());
         processCopy.setRegelsatz(processTemplate.getRegelsatz());
         processCopy.setDocket(processTemplate.getDocket());
-
+        // copy from template
         this.bHelper.SchritteKopieren(processTemplate, processCopy);
         this.bHelper.ScanvorlagenKopieren(processTemplate, processCopy);
         this.bHelper.WerkstueckeKopieren(processTemplate, processCopy);
@@ -776,7 +769,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 
         SubnodeConfiguration myconfig = null;
         try {
-            myconfig = xmlConfig.configurationAt("//config[./template = '" + workflowTitle + "']");
+            myconfig = xmlConfig.configurationAt("//config");
         } catch (IllegalArgumentException e) {
             myconfig = xmlConfig.configurationAt("//config[./template = '*']");
         }
@@ -919,6 +912,9 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
                     }
 
                     String catalogueIdentifier = rowMap.get(headerOrder.get(config.getIdentifierHeaderName()));
+                    
+                    String regex = ConfigurationHelper.getInstance().getProcessTitleReplacementRegex();
+                    catalogueIdentifier = catalogueIdentifier.replaceAll(regex, "_");
                     if (StringUtils.isBlank(catalogueIdentifier)) {
                         return;
                     }
@@ -957,71 +953,10 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
                 addMetadatumToDocStruct(rowMap, logical, anchor, gndURL, mmo);
             }
 
-            for (PersonMappingObject mmo : getConfig().getPersonList()) {
-                addPersonToDocStruct(rowMap, logical, anchor, gndURL, mmo);
-            }
-
-            for (GroupMappingObject gmo : getConfig().getGroupList()) {
-                addGroupToDocStruct(rowMap, logical, anchor, gndURL, gmo);
-            }
             // write mets file into import folder
             process.writeMetadataFile(ff);
         } catch (WriteException | PreferencesException | MetadataTypeNotAllowedException | TypeNotAllowedForParentException e) {
             log.error("Error while writing Metadata file for process " + process.getTitel(), e);
-        }
-    }
-
-    private void addGroupToDocStruct(Map<Integer, String> rowMap, DocStruct logical, DocStruct anchor, String gndURL, GroupMappingObject gmo) {
-        try {
-            MetadataGroup group = new MetadataGroup(prefs.getMetadataGroupTypeByName(gmo.getRulesetName()));
-            for (MetadataMappingObject mmo : gmo.getMetadataList()) {
-                String value = rowMap.get(headerOrder.get(mmo.getIdentifier()));
-                Metadata md = new Metadata(prefs.getMetadataTypeByName(mmo.getRulesetName()));
-                md.setValue(value);
-                if (mmo.getNormdataHeaderName() != null) {
-                    md.setAutorityFile("gnd", gndURL, rowMap.get(headerOrder.get(mmo.getNormdataHeaderName())));
-                }
-                group.addMetadata(md);
-            }
-            for (PersonMappingObject pmo : gmo.getPersonList()) {
-                Person p = new Person(prefs.getMetadataTypeByName(pmo.getRulesetName()));
-                String firstname = "";
-                String lastname = "";
-                if (pmo.isSplitName()) {
-                    String name = rowMap.get(headerOrder.get(pmo.getHeaderName()));
-                    if (StringUtils.isNotBlank(name)) {
-                        if (name.contains(pmo.getSplitChar())) {
-                            if (pmo.isFirstNameIsFirst()) {
-                                firstname = name.substring(0, name.lastIndexOf(pmo.getSplitChar()));
-                                lastname = name.substring(name.lastIndexOf(pmo.getSplitChar()));
-                            } else {
-                                lastname = name.substring(0, name.lastIndexOf(pmo.getSplitChar()));
-                                firstname = name.substring(name.lastIndexOf(pmo.getSplitChar()));
-                            }
-                        } else {
-                            lastname = name;
-                        }
-                    }
-                } else {
-                    firstname = rowMap.get(headerOrder.get(pmo.getFirstnameHeaderName()));
-                    lastname = rowMap.get(headerOrder.get(pmo.getLastnameHeaderName()));
-                }
-                p.setFirstname(firstname);
-                p.setLastname(lastname);
-
-                if (pmo.getNormdataHeaderName() != null) {
-                    p.setAutorityFile("gnd", gndURL, rowMap.get(headerOrder.get(pmo.getNormdataHeaderName())));
-                }
-                group.addMetadata(p);
-            }
-            if (anchor != null && "anchor".equals(gmo.getDocType())) {
-                anchor.addMetadataGroup(group);
-            } else {
-                logical.addMetadataGroup(group);
-            }
-        } catch (MetadataTypeNotAllowedException e) {
-            log.info(e);
-            // Metadata is not known or not allowed
         }
     }
 
@@ -1063,54 +998,6 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
                             logical.addMetadata(md);
                         }
                     }
-                }
-            } catch (MetadataTypeNotAllowedException e) {
-                log.info(e);
-                // Metadata is not known or not allowed
-            }
-        }
-    }
-
-    private void addPersonToDocStruct(Map<Integer, String> rowMap, DocStruct logical, DocStruct anchor, String gndURL, PersonMappingObject mmo) {
-        String firstname = "";
-        String lastname = "";
-        if (mmo.isSplitName()) {
-            String name = rowMap.get(headerOrder.get(mmo.getHeaderName()));
-            if (StringUtils.isNotBlank(name)) {
-                if (name.contains(mmo.getSplitChar())) {
-                    if (mmo.isFirstNameIsFirst()) {
-                        firstname = name.substring(0, name.lastIndexOf(mmo.getSplitChar()));
-                        lastname = name.substring(name.lastIndexOf(mmo.getSplitChar()));
-                    } else {
-                        lastname = name.substring(0, name.lastIndexOf(mmo.getSplitChar())).trim();
-                        firstname = name.substring(name.lastIndexOf(mmo.getSplitChar()) + 1).trim();
-                    }
-                } else {
-                    lastname = name;
-                }
-            }
-        } else {
-            firstname = rowMap.get(headerOrder.get(mmo.getFirstnameHeaderName()));
-            lastname = rowMap.get(headerOrder.get(mmo.getLastnameHeaderName()));
-        }
-
-        String identifier = null;
-        if (mmo.getNormdataHeaderName() != null) {
-            identifier = rowMap.get(headerOrder.get(mmo.getNormdataHeaderName()));
-        }
-        if (StringUtils.isNotBlank(mmo.getRulesetName())) {
-            try {
-                Person p = new Person(prefs.getMetadataTypeByName(mmo.getRulesetName()));
-                p.setFirstname(firstname);
-                p.setLastname(lastname);
-
-                if (identifier != null) {
-                    p.setAutorityFile("gnd", gndURL, identifier);
-                }
-                if (anchor != null && "anchor".equals(mmo.getDocType())) {
-                    anchor.addPerson(p);
-                } else {
-                    logical.addPerson(p);
                 }
             } catch (MetadataTypeNotAllowedException e) {
                 log.info(e);

@@ -1,41 +1,16 @@
 <config_plugin>
 	
 	<!-- which file types shall be allowed for uploading these -->
-	<allowed-file-extensions>/(\\.|\\/)(gif|jpe?g|png|tiff?|jp2|pdf|xls|xlsx)$/</allowed-file-extensions>
+	<allowed-file-extensions>/(\\.|\\/)(xls|xlsx)$/</allowed-file-extensions>
     
-    <!-- name of the folder inside of a users home directory to use as alteranive for web upload -->
-    <user-folder-name>mass_upload</user-folder-name>
-	
-	<!-- copy images using goobi script in the background (true or false) -->
-    <copy-images-using-goobiscript>false</copy-images-using-goobiscript>
-	
-	<!-- which workflow step has to be open to allow the upload into the process -->
-	<allowed-step>Scanning</allowed-step>
-	<allowed-step>Upload</allowed-step>
-	
-	<!-- which part of the files shall be used to find the right process (prefix, suffix or complete) -->
-	<filename-part>prefix</filename-part>
-	<filename-separator>-</filename-separator>
-
-
 	<qaStepName>Quality assurance</qaStepName>
 	
-	<!-- which part of the process title shall be used to match the right process (prefix, suffix or complete) - STILL UNUSED
-	<processname-part>complete</processname-part>
-	<processname_separator>_</processname_separator>
-	 -->
-	
-
-
 	<config>
-		<!-- which workflow template shall be used -->
-		<template>*</template>
 		<!-- publication type to create -->
 		<publicationType>Collection</publicationType>
-		<!-- which digital collection to use
+		<!-- which digital collection to use -->
 	
 		<collection>General</collection>
-		 -->
 		<rowIdentifier>2</rowIdentifier>
 		<!-- define in which row the header is written, usually 1 -->
 		<rowHeader>3</rowHeader>
@@ -62,6 +37,7 @@
 			- either: checks that either this metadatum or the one provided by its identifier in this attribute have content
 			- requiredFields: allows to configure fields that must have content before this metadatum is allowed to have content, takes a 
 				list of identifiers separated by "; "
+			- wordcount: checks that a certain number of words are in the field
 
 		Additionally it is possible to configure specific error messages for every validation criterion which are then displayed as a Mouse 
 		over Text in the validation area for any fields that failed a validation:
@@ -70,6 +46,7 @@
 			- listErrorMessage: displayed if cell contents are not in provided "list"
 			- eitherErrorMessage: displayed if neither this cell or the one configured as "either" have content
 			- requiredErrorMessage: displayed if a cell had contents despite at least one of the ones listed as "requiredFields" being empty
+			- wordcountErrorMessage: displayed if a cell has less Words than required
 -->
 		<metadata ugh="CatalogIDDigital" identifier="1" required="true" requiredErrorMessage="Field is required" pattern="^[A-Z]*-\\d*$" patternErrorMessage="Needs to be of the Format AAA-000" />
 		<metadata ugh="Country" identifier="2" required="true" requiredErrorMessage="Field is required" list="/opt/digiverso/goobi/config/plugin_intranda_workflow_excelimport_ISO3166-1.txt" listErrorMessage="Content not in list of valid options"/>
@@ -108,8 +85,5 @@
 		<metadata ugh="Copies" identifier="23" />
 		<metadata ugh="Originals" identifier="24" />
 		<metadata ugh="AuthorOfDescription" identifier="25" />
-
-
-
 	</config>
 </config_plugin>
