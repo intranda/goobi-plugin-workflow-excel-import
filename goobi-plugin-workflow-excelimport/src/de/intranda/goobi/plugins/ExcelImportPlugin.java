@@ -1076,8 +1076,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
                     Metadata md = new Metadata(prefs.getMetadataTypeByName(mmo.getRulesetName()));
                     // check if CatalogIDDigital has any disallowed characters, if so replace them with _
                     if (mmo.getRulesetName().equals("CatalogIDDigital")) {
-                        String regex = ConfigurationHelper.getInstance().getProcessTitleReplacementRegex();
-                        value = value.replaceAll(regex, "_");
+                        value = value.replaceAll(" ", "-");
                     }
                     // all other Metadata are added here
                     md.setValue(value);
