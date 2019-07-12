@@ -543,6 +543,11 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
         // add message for successful process ceation
         Helper.setMeldung(messageIdentifier,
                 Helper.getTranslation("process_created") + " " + Helper.getTranslation("process_grid_CatalogIDDigital") + ": " + cleanedTitle, "");
+        writeErrorsToProcessLog(title, processCopy);
+        return processCopy;
+    }
+
+    private void writeErrorsToProcessLog(String title, Process processCopy) {
         List<String> processErrors = new ArrayList<>();
         //find row for this process in rowList by title
         for (DataRow row : rowList) {
@@ -552,7 +557,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
                     for (Metadatum m : row.getContentList()) {
                         if (!m.isValid()) {
                             for (String error : m.getErrorMessages()) {
-                                processErrors.add(m.getHeadername()+": "+error);
+                                processErrors.add(m.getHeadername() + ": " + error);
                             }
                         }
                     }
@@ -572,7 +577,6 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
             processlog += "</ul>";
             Helper.addMessageToProcessLog(processCopy.getId(), LogType.ERROR, processlog);
         }
-        return processCopy;
     }
 
     private String getInstitutionIdentifier(String title) {
@@ -1102,6 +1106,25 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
                         }
                     }
                 } else {
+                    if (mmo.getRulesetName().equals("DateOfOrigin") && value.contains("/")) {
+                        String[] splitDate = value.split("/");
+                        Metadata mdStart = new Metadata(prefs.getMetadataTypeByName("DateStart"));
+                        Metadata mdEnd = new Metadata(prefs.getMetadataTypeByName("DateEnd"));
+
+                        mdStart.setValue(splitDate[0]);
+                        mdEnd.setValue(splitDate[1]);
+                        if (identifier != null) {
+                            mdStart.setAutorityFile("gnd", gndURL, identifier);
+                            mdEnd.setAutorityFile("gnd", gndURL, identifier);
+                        }
+                        if (anchor != null && "anchor".equals(mmo.getDocType())) {
+                            anchor.addMetadata(mdStart);
+                            anchor.addMetadata(mdEnd);
+                        } else {
+                            logical.addMetadata(mdStart);
+                            logical.addMetadata(mdEnd);
+                        }
+                    }
                     Metadata md = new Metadata(prefs.getMetadataTypeByName(mmo.getRulesetName()));
                     // check if CatalogIDDigital has any disallowed characters, if so replace them with _
                     if (mmo.getRulesetName().equals("CatalogIDDigital")) {
