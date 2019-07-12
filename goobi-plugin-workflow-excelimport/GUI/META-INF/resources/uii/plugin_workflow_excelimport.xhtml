@@ -124,17 +124,6 @@
 										<ui:fragment  rendered="#{NavigationForm.workflowPlugin.rowList.size() > 0}" >
 											<h:form styleClass="form-horizontal form-bordered" id="processparametersForm">
 											
-													<intranda:formInputText 
-														id="batch_name" 
-														name="titel2" 
-														label="#{msgs.plugin_yerushaExcelImport_batchName}" 
-														field="#{NavigationForm.workflowPlugin.batchName}" 
-														help="#{msgs.plugin_yerushaExcelImport_batchName_help}" 
-														fieldStyle="form-control" 
-														required="false" 
-														classLeft="col-xs-5"
-														classRight="col-xs-7"/>
-													
 													<intranda:formInputDropDownAjax 
 														id="workflow" 
 														label="#{msgs.plugin_yerushaExcelImport_workflow}" 
@@ -151,7 +140,7 @@
 														itemValue="#{process}"
 														classLeft="col-xs-5"
 														classRight="col-xs-7"/>
-														
+											
 													<h:panelGroup id="manualChecking_wrap" display="block">
  														<ui:fragment rendered="#{NavigationForm.workflowPlugin.templateHasQaStep()}" > 
 															<intranda:formInputCheckBoxAjax 
@@ -191,7 +180,16 @@
 														</ui:fragment>
 													</h:panelGroup>
 													
-
+													<intranda:formInputText 
+														id="batch_name" 
+														name="titel2" 
+														label="#{msgs.plugin_yerushaExcelImport_batchName}" 
+														field="#{NavigationForm.workflowPlugin.batchName}" 
+														help="#{msgs.plugin_yerushaExcelImport_batchName_help}" 
+														fieldStyle="form-control" 
+														required="false" 
+														classLeft="col-xs-5"
+														classRight="col-xs-7"/>
 														
 													<div class="row">
 														<div class="col-xs-5" style="padding-top: 0px;">
