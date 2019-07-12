@@ -181,7 +181,7 @@
 													</h:panelGroup>
 													
 													<intranda:formInputText 
-														id="batch_name" 
+														id="batchName" 
 														name="titel2" 
 														label="#{msgs.plugin_yerushaExcelImport_batchName}" 
 														field="#{NavigationForm.workflowPlugin.batchName}" 
@@ -199,7 +199,7 @@
 														</div>
 														<div class="col-xs-7">
 															<h:commandButton id="workflowExcelImportProcessCreation" type="button" class="btn btn-success font-size-s" value="#{msgs.plugin_yerushaExcelImport_createProcesses}" action="#{NavigationForm.workflowPlugin.startImport()}">
-																<f:ajax render=":processCreationResult" execute="@this batch_name"/>
+																<f:ajax render=":processCreationResult" execute="@this batchName"/>
 															</h:commandButton>
 															<h:commandButton type="button" class="btn margin-sides-10 font-size-s" value="#{msgs.abbrechen}" action="#{NavigationForm.workflowPlugin.cancelImport()}">
 																<f:ajax execute="@this" render="processParameters actionform"/>

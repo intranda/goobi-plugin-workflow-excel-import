@@ -38,6 +38,7 @@ import org.goobi.beans.Step;
 import org.goobi.beans.User;
 import org.goobi.beans.Usergroup;
 import org.goobi.managedbeans.LoginBean;
+import org.goobi.production.enums.LogType;
 import org.goobi.production.enums.PluginType;
 import org.goobi.production.flow.statistics.hibernate.FilterHelper;
 import org.goobi.production.importer.Record;
@@ -234,8 +235,8 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 
     public boolean templateHasQaStep() {
         setTemplateFromString();
-        Step step=getStepByName(processTemplate, qaStepName);
-        if(step!=null) {
+        Step step = getStepByName(processTemplate, qaStepName);
+        if (step != null) {
             return true;
         }
         return false;
@@ -542,7 +543,35 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
         // add message for successful process ceation
         Helper.setMeldung(messageIdentifier,
                 Helper.getTranslation("process_created") + " " + Helper.getTranslation("process_grid_CatalogIDDigital") + ": " + cleanedTitle, "");
-
+        List<String> processErrors = new ArrayList<>();
+        //find row for this process in rowList by title
+        for (DataRow row : rowList) {
+            if (row.getRowIdentifier().equals(title)) {
+                //if there were any validation errors add them to the list
+                if (row.getInvalidFields() > 0) {
+                    for (Metadatum m : row.getContentList()) {
+                        if (!m.isValid()) {
+                            for (String error : m.getErrorMessages()) {
+                                processErrors.add(m.getHeadername()+": "+error);
+                            }
+                        }
+                    }
+                } else {
+                    break;
+                }
+            }
+        }
+        if (!processErrors.isEmpty()) {
+            // ProcessManager.saveProcess(p);
+            String processlog = "Validation issues during in depth data analysis: " + "<br/>";
+            processlog += "<ul>";
+            for (String s : processErrors) {
+                Helper.setFehlerMeldung(s);
+                processlog += "<li>" + s + "</li>";
+            }
+            processlog += "</ul>";
+            Helper.addMessageToProcessLog(processCopy.getId(), LogType.ERROR, processlog);
+        }
         return processCopy;
     }
 
