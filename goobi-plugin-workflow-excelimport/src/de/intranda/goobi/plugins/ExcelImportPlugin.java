@@ -61,6 +61,8 @@ import de.sub.goobi.config.ConfigurationHelper;
 import de.sub.goobi.forms.MassImportForm;
 import de.sub.goobi.helper.BeanHelper;
 import de.sub.goobi.helper.Helper;
+import de.sub.goobi.helper.ScriptThreadWithoutHibernate;
+import de.sub.goobi.helper.enums.StepStatus;
 import de.sub.goobi.helper.exceptions.DAOException;
 import de.sub.goobi.helper.exceptions.ImportPluginException;
 import de.sub.goobi.helper.exceptions.SwapException;
@@ -353,6 +355,14 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
                 }
                 ProcessManager.saveProcess(process);
 
+                // now start the first automatic step 
+                for (Step s : process.getSchritte()) {
+                    if (s.getBearbeitungsstatusEnum().equals(StepStatus.OPEN) && s.isTypAutomatisch()) {
+                        ScriptThreadWithoutHibernate myThread = new ScriptThreadWithoutHibernate(s);
+                        myThread.start();
+                    }
+                }
+                
             } catch (IOException | InterruptedException | SwapException | DAOException e) {
                 log.error("Error while writing metsfile of newly created process " + record.getId(), e);
             }
