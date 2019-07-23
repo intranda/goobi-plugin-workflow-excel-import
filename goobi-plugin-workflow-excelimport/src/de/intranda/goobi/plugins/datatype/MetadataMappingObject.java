@@ -23,6 +23,7 @@ public class MetadataMappingObject {
     
     
     private boolean required;
+    private boolean split;
     private Pattern pattern;
     
     private List<String> validContent;
