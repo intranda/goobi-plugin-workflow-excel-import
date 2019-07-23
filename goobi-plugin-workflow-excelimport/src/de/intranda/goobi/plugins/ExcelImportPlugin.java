@@ -581,7 +581,6 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
             String processlog = "Validation issues during in depth data analysis: " + "<br/>";
             processlog += "<ul>";
             for (String s : processErrors) {
-                Helper.setFehlerMeldung(s);
                 processlog += "<li>" + s + "</li>";
             }
             processlog += "</ul>";
