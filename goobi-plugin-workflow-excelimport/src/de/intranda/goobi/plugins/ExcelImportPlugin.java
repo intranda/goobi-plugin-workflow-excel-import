@@ -362,7 +362,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
                         myThread.start();
                     }
                 }
-                
+
             } catch (IOException | InterruptedException | SwapException | DAOException e) {
                 log.error("Error while writing metsfile of newly created process " + record.getId(), e);
             }
@@ -590,12 +590,8 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
     }
 
     private String getInstitutionIdentifier(String title) {
-        String[] titleParts = title.split("-| |_");
-        String institutionIdentifier = titleParts[0];
-        if (institutionIdentifier.matches("\\w*")) {
-            return institutionIdentifier;
-        }
-        return null;
+        String institutionIdentifier = title.replaceAll("[^A-Za-z]+", "");
+        return institutionIdentifier;
     }
 
     /**
@@ -994,7 +990,6 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
      * @throws DAOException
      */
     public void generateFiles(Record record, Process process) throws IOException, InterruptedException, SwapException, DAOException {
-
         try {
 
             Object tempObject = record.getObject();
@@ -1099,7 +1094,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
         if (StringUtils.isNotBlank(mmo.getRulesetName()) && StringUtils.isNotBlank(value)) {
             try {
                 // DocLanguage needs special treatment as their might be several languages in the field that need to be separated
-                if (mmo.getRulesetName().equals("DocLanguage")) {
+                if (mmo.isSplit()) {
                     String[] valueList = value.split("; ");
                     for (String language : valueList) {
 

@@ -76,6 +76,7 @@ public class Config {
         String listPath = md.getString("@list");
         String identifier = md.getString("@identifier");
         Integer wordcount = md.getInteger("@wordcount", 0);
+        boolean split=md.getBoolean("@split",false);
 
         String requiredErrorMessage = md.getString("@requiredErrorMessage", "");
         String patternErrorMessage = md.getString("@patternErrorMessage", "");
@@ -115,6 +116,7 @@ public class Config {
         mmo.setValidContent(validContent);
         mmo.setEitherHeader(eitherHeader);
         mmo.setWordcount(wordcount);
+        mmo.setSplit(split);
         mmo.setEitherErrorMessage(eitherErrorMessage);
         mmo.setPatternErrorMessage(patternErrorMessage);
         mmo.setRequiredErrorMessage(requiredErrorMessage);
