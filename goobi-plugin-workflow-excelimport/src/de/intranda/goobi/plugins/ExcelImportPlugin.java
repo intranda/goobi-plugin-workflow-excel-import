@@ -897,12 +897,14 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
             row.setRowIdentifier(rowIdentifier);
             for (MetadataMappingObject mmo : getConfig().getMetadataList()) {
                 Metadatum datum = validateMetadatum(rowMap, mmo);
-                row.getContentList().add(datum);
-                // count number of invalid fields in this row to display as statistic
-                if (!datum.isValid()) {
-                    row.setInvalidFields(row.getInvalidFields() + 1);
-                }
+                if (datum != null) {
+                    row.getContentList().add(datum);
+                    // count number of invalid fields in this row to display as statistic
+                    if (!datum.isValid()) {
+                        row.setInvalidFields(row.getInvalidFields() + 1);
+                    }
 
+                }
             }
             rowlist.add(row);
         }
@@ -920,6 +922,9 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
         Metadatum datum = new Metadatum();
         datum.setHeadername(mmo.getHeaderName());
         String value = rowMap.get(headerOrder.get(mmo.getIdentifier()));
+        if (value == null) {
+            return null;
+        }
         value = value.replaceAll("¶", "<br/><br/>");
         datum.setValue(value);
         // check if value is empty but required

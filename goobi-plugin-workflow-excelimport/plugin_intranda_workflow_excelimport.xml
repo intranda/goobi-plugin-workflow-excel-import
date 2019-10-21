@@ -45,7 +45,7 @@
 			- patternErrorMessage: dispayed if cell contents do not match provided regex "pattern"
 			- listErrorMessage: displayed if cell contents are not in provided "list"
 			- eitherErrorMessage: displayed if neither this cell or the one configured as "either" have content
-			- requiredErrorMessage: displayed if a cell had contents despite at least one of the ones listed as "requiredFields" being empty
+			- requiredFieldsErrorMessage: displayed if a cell had contents despite at least one of the ones listed as "requiredFields" being empty
 			- wordcountErrorMessage: displayed if a cell has less Words than required
 -->
 		<metadata ugh="CatalogIDDigital" identifier="1" required="true" requiredErrorMessage="Field is required" pattern="^[A-Z]*-\\d*$" patternErrorMessage="Needs to be of the Format AAA-000" />
