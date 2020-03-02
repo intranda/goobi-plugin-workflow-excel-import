@@ -213,12 +213,40 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
             saveFileTemporary(upload.getFileName(), upload.getInputstream());
             excelFile = Paths.get(uploadedFiles.get(0).getFile().getAbsolutePath());
             recordList = generateRecordsFromFile();
+
+            DataRow headerValidation = validateColumns();
+            if (headerValidation.getInvalidFields()>0) {
+                rowList.add(headerValidation);
+                recordList = new ArrayList<>();
+                return;
+            }
+
+
             rowList = validateMetadata(recordList);
             initTemplateList();
         } catch (IOException e) {
             log.error("Error while uploading files", e);
         }
 
+    }
+
+    private DataRow validateColumns() {
+        DataRow row = new DataRow();
+
+        for (MetadataMappingObject mmo : getConfig().getMetadataList()) {
+            if (!headerOrder.containsKey(mmo.getIdentifier())) {
+                Metadatum datum = new Metadatum();
+                datum.setHeadername(mmo.getIdentifier());
+                // datum.setHeadername(mmo.getHeaderName());
+                datum.setValue("Column '" + mmo.getIdentifier() + "' is expected, but missing.");
+                datum.setValid(false);
+                datum.getErrorMessages().add("Column '" + mmo.getIdentifier() + "' is expected, but missing.");
+                row.setInvalidFields(row.getInvalidFields() + 1);
+                row.getContentList().add(datum);
+            }
+        }
+
+        return row;
     }
 
     /**
@@ -355,7 +383,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
                 }
                 ProcessManager.saveProcess(process);
 
-                // now start the first automatic step 
+                // now start the first automatic step
                 for (Step s : process.getSchritte()) {
                     if (s.getBearbeitungsstatusEnum().equals(StepStatus.OPEN) && s.isTypAutomatisch()) {
                         ScriptThreadWithoutHibernate myThread = new ScriptThreadWithoutHibernate(s);
@@ -903,7 +931,6 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
                     if (!datum.isValid()) {
                         row.setInvalidFields(row.getInvalidFields() + 1);
                     }
-
                 }
             }
             rowlist.add(row);
