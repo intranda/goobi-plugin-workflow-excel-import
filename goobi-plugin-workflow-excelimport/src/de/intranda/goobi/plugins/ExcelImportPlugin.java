@@ -689,13 +689,16 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
                 Workbook wb = WorkbookFactory.create(in)) {
 
             Sheet sheet = wb.getSheetAt(0);
+            int rowStart = sheet.getFirstRowNum();
+
+
             Iterator<Row> rowIterator = sheet.rowIterator();
 
             // get header and data row number from config first
-            int rowIdentifier = getConfig().getRowIdentifier();
-            int rowHeader = getConfig().getRowHeader();
-            int rowDataStart = getConfig().getRowDataStart();
-            int rowDataEnd = getConfig().getRowDataEnd();
+            int rowIdentifier = getConfig().getRowIdentifier() - rowStart;
+            int rowHeader = getConfig().getRowHeader() - rowStart;
+            int rowDataStart = getConfig().getRowDataStart() - rowStart;
+            int rowDataEnd = getConfig().getRowDataEnd() - rowStart;
             int rowCounter = 0;
 
             // find the identifier row
