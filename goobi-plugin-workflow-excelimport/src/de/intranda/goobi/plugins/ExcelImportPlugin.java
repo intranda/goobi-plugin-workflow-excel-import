@@ -1118,7 +1118,11 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
      * @param mmo
      */
     private void addMetadatumToDocStruct(Map<Integer, String> rowMap, DocStruct logical, DocStruct anchor, String gndURL, MetadataMappingObject mmo) {
+
         String value = rowMap.get(headerOrder.get(mmo.getIdentifier()));
+        if (StringUtils.isBlank(value)) {
+            return ;
+        }
         value = value.replaceAll("¶", "<br/><br/>");
 
         String identifier = null;
