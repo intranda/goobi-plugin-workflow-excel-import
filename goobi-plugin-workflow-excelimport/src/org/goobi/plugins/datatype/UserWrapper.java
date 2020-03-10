@@ -1,4 +1,4 @@
-package de.intranda.goobi.plugins.datatype;
+package org.goobi.plugins.datatype;
 
 import org.goobi.beans.User;
 

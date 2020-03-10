@@ -1,6 +1,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>de.intranda.goobi.plugins.workflow</groupId>
+	<groupId>de.intranda.goobi.plugins.step</groupId>
 	<artifactId>excelimport-gui</artifactId>
 	<version>1.0.0</version>
 	<properties>
@@ -13,54 +13,43 @@
 		<version>1.0.0</version>
 	</parent>
 	<build>
-		<finalName>${jar.name}</finalName>
-		<resources>
-			<resource>
-				<directory>../GUI</directory>
+        <finalName>${jar.name}</finalName>
+        <sourceDirectory>${project.basedir}/../src</sourceDirectory>
+        <resources>
+            <resource>
+                <directory>../GUI</directory>
+            </resource>
+            <resource>
+                <directory>../src</directory>
 				<excludes>
 					<exclude>**/*.java</exclude>
 				</excludes>
+                <includes>
+                    <include>**/datatype/*.class</include>
+                </includes>
 			</resource>
 		</resources>
 		<plugins>
 			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>buildnumber-maven-plugin</artifactId>
-				<version>1.4</version>
-
-				<executions>
-					<execution>
-						<phase>validate</phase>
-						<goals>
-							<goal>create</goal>
-						</goals>
-					</execution>
-				</executions>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.7.0</version>
 				<configuration>
-					<shortRevisionLength>10</shortRevisionLength>
-					<doCheck>false</doCheck>
+					<source>1.8</source>
+					<target>1.8</target>
+                    <excludes>
+                        <exclude>**/de/intranda/goobi/**/*.java</exclude>
+                    </excludes>
 				</configuration>
-			</plugin><plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-jar-plugin</artifactId>
-            <version>3.1.0</version>
-            <configuration>
-                <archive>
-                    <manifestEntries>
-                        <Build-Time>${maven.build.timestamp}</Build-Time>
-                    </manifestEntries>
-                    <manifestSections>
-                        <manifestSection>
-                            <name>Versions</name>
-                            <manifestEntries>
-                                <Implementation-Version>${project.version}</Implementation-Version>
-                                <Implementation-SCM-Revision>${buildNumber}</Implementation-SCM-Revision>
-                                <Implementation-SCM-Branch>${scmBranch}</Implementation-SCM-Branch>
-                            </manifestEntries>
-                        </manifestSection>
-                    </manifestSections>
-                </archive>
-            </configuration>
-        </plugin></plugins>
+                
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.12.4</version>
+				<configuration>
+					<skipTests>true</skipTests>
+				</configuration>
+			</plugin>
+			</plugins>
 	</build>
 <scm><url>scm:git:ssh://git@gitea.intranda.com:goobi-workflow/goobi-plugin-workflow-excelimport.git</url><connection>scm:git:ssh://git@gitea.intranda.com:goobi-workflow/goobi-plugin-workflow-excelimport.git</connection></scm></project>

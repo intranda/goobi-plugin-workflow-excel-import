@@ -1,4 +1,4 @@
-package de.intranda.goobi.plugins.datatype;
+package org.goobi.plugins.datatype;
 
 import java.util.ArrayList;
 import java.util.List;
