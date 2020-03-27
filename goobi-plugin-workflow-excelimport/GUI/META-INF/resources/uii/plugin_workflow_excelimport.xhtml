@@ -44,7 +44,7 @@
 					 					
 					 					<h4>#{row.rowIdentifier}</h4>
 					 					
-					 					<table class="table table-hover table-nomargin dataTable table-bordered responsive" style="margin-bottom:15px;">
+					 					<table class="table table-hover table-nomargin dataTable table-bordered responsive table-border-right" style="margin-bottom:15px;">
 					 						<ui:repeat var="metadatum" value="#{row.contentList}">
 						 						
 						 						<ui:fragment rendered="#{NavigationForm.uiStatus.workflow_excel_import eq 'down' or !metadatum.valid}" >

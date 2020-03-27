@@ -548,13 +548,17 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
                 project = p;
             }
         }
-
+        // if no project could be found report it back
+        if (project == null) {
+        	Helper.setFehlerMeldung(messageIdentifier, Helper.getTranslation("noProjectFoundForProcess") + " [" + title + " - " + institutionIdentifier + "]", "");
+        	return null;
+        }
         // remove non-ascii characters for the sake of TIFF header limits
         String regex = ConfigurationHelper.getInstance().getProcessTitleReplacementRegex();
         String cleanedTitle = title.replaceAll(regex, "_");
         // check if process title is already in use abort creation and set notification
         // if that is the case
-        if (ProcessManager.countProcessTitle(cleanedTitle) != 0) {
+        if (ProcessManager.countProcessTitle(cleanedTitle, project.getInstitution()) != 0) {
             Helper.setFehlerMeldung(messageIdentifier, Helper.getTranslation("ProcessCreationErrorTitleAllreadyInUse") + " "
                     + Helper.getTranslation("process_grid_CatalogIDDigital") + ": " + cleanedTitle, "");
             return null;
@@ -612,7 +616,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
                 processlog += "<li>" + s + "</li>";
             }
             processlog += "</ul>";
-            Helper.addMessageToProcessLog(processCopy.getId(), LogType.ERROR, processlog);
+            Helper.addMessageToProcessLog(processCopy.getId(), LogType.DEBUG, processlog);
         }
     }
 
