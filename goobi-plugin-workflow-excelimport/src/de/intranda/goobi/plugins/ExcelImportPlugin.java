@@ -584,7 +584,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
         ProcessManager.saveProcess(processCopy);
         // add message for successful process ceation
         Helper.setMeldung(messageIdentifier,
-                Helper.getTranslation("process_created") + " " + Helper.getTranslation("process_grid_CatalogIDDigital") + ": " + cleanedTitle, "");
+                Helper.getTranslation("process_created") + " - " + Helper.getTranslation("process_grid_CatalogIDDigital") + ": " + cleanedTitle, "");
         writeErrorsToProcessLog(title, processCopy);
         return processCopy;
     }
