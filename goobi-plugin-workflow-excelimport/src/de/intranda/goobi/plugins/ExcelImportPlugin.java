@@ -766,7 +766,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
         }
         // read all cells in the current row
         for (int cellNumber = 0; cellNumber < lastColumn; cellNumber++) {
-            String value = getCellContent(row, cellNumber);
+            String value = getCellContent(row, cellNumber).trim();
             map.put(cellNumber, value);
 
         }
@@ -955,7 +955,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
     private Metadatum validateMetadatum(Map<Integer, String> rowMap, MetadataMappingObject mmo) {
         Metadatum datum = new Metadatum();
         datum.setHeadername(mmo.getHeaderName());
-        String value = rowMap.get(headerOrder.get(mmo.getIdentifier()));
+        String value = rowMap.get(headerOrder.get(mmo.getIdentifier())).trim();
         if (value == null) {
             return null;
         }
