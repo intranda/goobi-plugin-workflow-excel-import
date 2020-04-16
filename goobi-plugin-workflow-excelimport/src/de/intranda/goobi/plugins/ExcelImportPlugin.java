@@ -955,11 +955,12 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
     private Metadatum validateMetadatum(Map<Integer, String> rowMap, MetadataMappingObject mmo) {
         Metadatum datum = new Metadatum();
         datum.setHeadername(mmo.getHeaderName());
-        String value = rowMap.get(headerOrder.get(mmo.getIdentifier())).trim();
+        String value = rowMap.get(headerOrder.get(mmo.getIdentifier()));
         if (value == null) {
             return null;
         }
         value = value.replaceAll("¶", "<br/><br/>");
+        value = value.replaceAll("\\u00A0|\\u2007|\\u202F", " ").trim();
         datum.setValue(value);
         // check if value is empty but required
         if (mmo.isRequired()) {
@@ -1128,6 +1129,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
             return ;
         }
         value = value.replaceAll("¶", "<br/><br/>");
+        value = value.replaceAll("\\u00A0|\\u2007|\\u202F", " ").trim();
 
         String identifier = null;
         if (mmo.getNormdataHeaderName() != null) {
