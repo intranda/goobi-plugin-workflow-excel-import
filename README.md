@@ -1,6 +1,6 @@
 # Goobi workflow Plugin: plugin_intranda_workflow_excelimport
 
-<img src="https://goobi.io/wp-content/uploads/logo_goobi_plugin.png" align="right" style="margin:0 0 20px 20px;" alt="Plugin for Goobi workflow" width="175" height="109">
+<img src="https://goobi.io/wp-content/uploads/logo_goobi_plugin.png" align="right" style="margin:0 0 20px 20px;" alt="Plugin for Goobi workflow" width="175" height="108">
 
 This workflow plugin allows the mass import of data from Excel files including the display of validation messages.
 
