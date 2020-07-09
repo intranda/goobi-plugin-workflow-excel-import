@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -136,14 +137,13 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
     /**
      * Constructor
      */
-    @SuppressWarnings("unchecked")
     public ExcelImportPlugin() {
         log.info("Excel Import Plugin started");
         allowedTypes = ConfigPlugins.getPluginConfig(PLUGIN_NAME).getString("allowed-file-extensions", "/(\\.|\\/)(gif|jpe?g|png|tiff?|jp2|pdf)$/");
         filenamePart = ConfigPlugins.getPluginConfig(PLUGIN_NAME).getString("filename-part", "prefix").toLowerCase();
         userFolderName = ConfigPlugins.getPluginConfig(PLUGIN_NAME).getString("user-folder-name", "mass_upload").toLowerCase();
         filenameSeparator = ConfigPlugins.getPluginConfig(PLUGIN_NAME).getString("filename-separator", "_").toLowerCase();
-        stepTitles = ConfigPlugins.getPluginConfig(PLUGIN_NAME).getList("allowed-step");
+        stepTitles = Arrays.asList(ConfigPlugins.getPluginConfig(PLUGIN_NAME).getStringArray("allowed-step"));
         qaStepName = ConfigPlugins.getPluginConfig(PLUGIN_NAME).getString("qaStepName");
         copyImagesViaGoobiScript = ConfigPlugins.getPluginConfig(PLUGIN_NAME).getBoolean("copy-images-using-goobiscript", false);
         LoginBean login = (LoginBean) Helper.getManagedBeanValue("#{LoginForm}");
@@ -550,8 +550,8 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
         }
         // if no project could be found report it back
         if (project == null) {
-        	Helper.setFehlerMeldung(messageIdentifier, Helper.getTranslation("noProjectFoundForProcess") + " [" + title + " - " + institutionIdentifier + "]", "");
-        	return null;
+            Helper.setFehlerMeldung(messageIdentifier, Helper.getTranslation("noProjectFoundForProcess") + " [" + title + " - " + institutionIdentifier + "]", "");
+            return null;
         }
         // remove non-ascii characters for the sake of TIFF header limits
         String regex = ConfigurationHelper.getInstance().getProcessTitleReplacementRegex();
