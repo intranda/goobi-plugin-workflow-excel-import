@@ -92,7 +92,10 @@ import ugh.fileformats.mets.MetsMods;
 @Data
 public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 
-    private static final String PLUGIN_NAME = "intranda_workflow_excelimport";
+    private  String title = "intranda_workflow_excelimport";
+    private PluginType type = PluginType.Workflow;
+    private String gui = "/uii/plugin_workflow_excelimport.xhtml";
+
     private String allowedTypes;
     private String filenamePart;
     private String userFolderName;
@@ -139,32 +142,17 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
      */
     public ExcelImportPlugin() {
         log.info("Excel Import Plugin started");
-        allowedTypes = ConfigPlugins.getPluginConfig(PLUGIN_NAME).getString("allowed-file-extensions", "/(\\.|\\/)(gif|jpe?g|png|tiff?|jp2|pdf)$/");
-        filenamePart = ConfigPlugins.getPluginConfig(PLUGIN_NAME).getString("filename-part", "prefix").toLowerCase();
-        userFolderName = ConfigPlugins.getPluginConfig(PLUGIN_NAME).getString("user-folder-name", "mass_upload").toLowerCase();
-        filenameSeparator = ConfigPlugins.getPluginConfig(PLUGIN_NAME).getString("filename-separator", "_").toLowerCase();
-        stepTitles = Arrays.asList(ConfigPlugins.getPluginConfig(PLUGIN_NAME).getStringArray("allowed-step"));
-        qaStepName = ConfigPlugins.getPluginConfig(PLUGIN_NAME).getString("qaStepName");
-        copyImagesViaGoobiScript = ConfigPlugins.getPluginConfig(PLUGIN_NAME).getBoolean("copy-images-using-goobiscript", false);
+        allowedTypes = ConfigPlugins.getPluginConfig(title).getString("allowed-file-extensions", "/(\\.|\\/)(gif|jpe?g|png|tiff?|jp2|pdf)$/");
+        filenamePart = ConfigPlugins.getPluginConfig(title).getString("filename-part", "prefix").toLowerCase();
+        userFolderName = ConfigPlugins.getPluginConfig(title).getString("user-folder-name", "mass_upload").toLowerCase();
+        filenameSeparator = ConfigPlugins.getPluginConfig(title).getString("filename-separator", "_").toLowerCase();
+        stepTitles = Arrays.asList(ConfigPlugins.getPluginConfig(title).getStringArray("allowed-step"));
+        qaStepName = ConfigPlugins.getPluginConfig(title).getString("qaStepName");
+        copyImagesViaGoobiScript = ConfigPlugins.getPluginConfig(title).getBoolean("copy-images-using-goobiscript", false);
         LoginBean login = (LoginBean) Helper.getManagedBeanValue("#{LoginForm}");
         if (login != null) {
             user = login.getMyBenutzer();
         }
-    }
-
-    @Override
-    public PluginType getType() {
-        return PluginType.Workflow;
-    }
-
-    @Override
-    public String getTitle() {
-        return PLUGIN_NAME;
-    }
-
-    @Override
-    public String getGui() {
-        return "/uii/plugin_workflow_excelimport.xhtml";
     }
 
     /**
@@ -1244,4 +1232,54 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
         }
         return myRdf;
     }
+
+    @Override
+    public String toString() {
+        return "ExcelImportPlugin [getType()=" + getType() + ", getTitle()=" + getTitle() + ", getGui()=" + getGui() + "]";
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        ExcelImportPlugin other = (ExcelImportPlugin) obj;
+        if (gui == null) {
+            if (other.gui != null) {
+                return false;
+            }
+        } else if (!gui.equals(other.gui)) {
+            return false;
+        }
+        if (title == null) {
+            if (other.title != null) {
+                return false;
+            }
+        } else if (!title.equals(other.title)) {
+            return false;
+        }
+        if (type != other.type) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((gui == null) ? 0 : gui.hashCode());
+        result = prime * result + ((title == null) ? 0 : title.hashCode());
+        result = prime * result + ((type == null) ? 0 : type.hashCode());
+        return result;
+    }
+
+
+
 }
