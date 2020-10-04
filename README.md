@@ -15,8 +15,8 @@ Detail | Description
 **Plugin identifier**       | intranda_workflow_excelimport
 **Plugin type**             | Workflow plugin
 **Licence**                 | GPL 2.0 or newer  
-**Documentation (German)**  | https://docs.goobi.io/goobi-workflow-plugins-de/workflow/goobi-plugin-workflow-excelimport
-**Documentation (English)** | https://docs.goobi.io/goobi-workflow-plugins-en/workflow/goobi-plugin-workflow-excelimport
+**Documentation (German)**  | https://docs.goobi.io/goobi-workflow-plugins-de/workflow/intranda_workflow_excelimport 
+**Documentation (English)** | https://docs.goobi.io/goobi-workflow-plugins-en/workflow/intranda_workflow_excelimport 
 
 ## Goobi details
 
