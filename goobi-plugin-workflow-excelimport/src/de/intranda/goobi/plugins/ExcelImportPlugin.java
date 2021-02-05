@@ -149,7 +149,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
         stepTitles = Arrays.asList(ConfigPlugins.getPluginConfig(title).getStringArray("allowed-step"));
         qaStepName = ConfigPlugins.getPluginConfig(title).getString("qaStepName");
         copyImagesViaGoobiScript = ConfigPlugins.getPluginConfig(title).getBoolean("copy-images-using-goobiscript", false);
-        LoginBean login = (LoginBean) Helper.getManagedBeanValue("#{LoginForm}");
+        LoginBean login = (LoginBean) Helper.getBeanByName("LoginForm", LoginBean.class);
         if (login != null) {
             user = login.getMyBenutzer();
         }
