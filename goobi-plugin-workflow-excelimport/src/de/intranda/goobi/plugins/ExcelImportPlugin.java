@@ -92,7 +92,7 @@ import ugh.fileformats.mets.MetsMods;
 @Data
 public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 
-    private  String title = "intranda_workflow_excelimport";
+    private String title = "intranda_workflow_excelimport";
     private PluginType type = PluginType.Workflow;
     private String gui = "/uii/plugin_workflow_excelimport.xhtml";
 
@@ -149,10 +149,6 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
         stepTitles = Arrays.asList(ConfigPlugins.getPluginConfig(title).getStringArray("allowed-step"));
         qaStepName = ConfigPlugins.getPluginConfig(title).getString("qaStepName");
         copyImagesViaGoobiScript = ConfigPlugins.getPluginConfig(title).getBoolean("copy-images-using-goobiscript", false);
-        LoginBean login = (LoginBean) Helper.getBeanByName("LoginForm", LoginBean.class);
-        if (login != null) {
-            user = login.getMyBenutzer();
-        }
     }
 
     /**
@@ -185,6 +181,14 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
      * @param event
      */
     public void uploadFile(FileUploadEvent event) {
+
+        if (user == null) {
+            LoginBean login = (LoginBean) Helper.getBeanByName("LoginForm", LoginBean.class);
+            if (login != null) {
+                user = login.getMyBenutzer();
+            }
+        }
+
         try {
             uploadedFiles = new ArrayList<>();
             rowList = new ArrayList<>();
@@ -203,12 +207,11 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
             recordList = generateRecordsFromFile();
 
             DataRow headerValidation = validateColumns();
-            if (headerValidation.getInvalidFields()>0) {
+            if (headerValidation.getInvalidFields() > 0) {
                 rowList.add(headerValidation);
                 recordList = new ArrayList<>();
                 return;
             }
-
 
             rowList = validateMetadata(recordList);
             initTemplateList();
@@ -538,7 +541,8 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
         }
         // if no project could be found report it back
         if (project == null) {
-            Helper.setFehlerMeldung(messageIdentifier, Helper.getTranslation("noProjectFoundForProcess") + " [" + title + " - " + institutionIdentifier + "]", "");
+            Helper.setFehlerMeldung(messageIdentifier,
+                    Helper.getTranslation("noProjectFoundForProcess") + " [" + title + " - " + institutionIdentifier + "]", "");
             return null;
         }
         // remove non-ascii characters for the sake of TIFF header limits
@@ -621,6 +625,12 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
      * @throws IOException
      */
     private void saveFileTemporary(String fileName, InputStream in) throws IOException {
+        if (user == null) {
+            LoginBean login = (LoginBean) Helper.getBeanByName("LoginForm", LoginBean.class);
+            if (login != null) {
+                user = login.getMyBenutzer();
+            }
+        }
         if (tempFolder == null) {
             tempFolder = Paths.get(ConfigurationHelper.getInstance().getTemporaryFolder(), user.getLogin());
             if (!Files.exists(tempFolder)) {
@@ -682,7 +692,6 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 
             Sheet sheet = wb.getSheetAt(0);
             int rowStart = sheet.getFirstRowNum();
-
 
             Iterator<Row> rowIterator = sheet.rowIterator();
 
@@ -1114,7 +1123,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 
         String value = rowMap.get(headerOrder.get(mmo.getIdentifier()));
         if (StringUtils.isBlank(value)) {
-            return ;
+            return;
         }
         value = value.replaceAll("¶", "<br/><br/>");
         value = value.replaceAll("\\u00A0|\\u2007|\\u202F", " ").trim();
@@ -1279,7 +1288,5 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
         result = prime * result + ((type == null) ? 0 : type.hashCode());
         return result;
     }
-
-
 
 }
