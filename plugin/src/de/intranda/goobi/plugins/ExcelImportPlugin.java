@@ -53,7 +53,7 @@ import org.goobi.production.plugin.interfaces.IOpacPlugin;
 import org.goobi.production.plugin.interfaces.IPlugin;
 import org.goobi.production.plugin.interfaces.IWorkflowPlugin;
 import org.primefaces.event.FileUploadEvent;
-import org.primefaces.model.UploadedFile;
+import org.primefaces.model.file.UploadedFile;
 
 import de.intranda.goobi.plugins.massuploadutils.MassUploadedFile;
 import de.intranda.goobi.plugins.massuploadutils.MassUploadedProcess;
@@ -202,7 +202,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
                 }
             }
             UploadedFile upload = event.getFile();
-            saveFileTemporary(upload.getFileName(), upload.getInputstream());
+            saveFileTemporary(upload.getFileName(), upload.getInputStream());
             excelFile = Paths.get(uploadedFiles.get(0).getFile().getAbsolutePath());
             recordList = generateRecordsFromFile();
 
