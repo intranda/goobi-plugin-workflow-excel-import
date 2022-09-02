@@ -8,6 +8,10 @@
 		<goobi.version>22.08</goobi.version>
 	</properties>
 	<repositories>
+	    <repository>
+	      <id>intranda-public</id>
+	      <url>https://nexus.intranda.com/repository/maven-public</url>
+	    </repository>	
 		<repository>
 			<id>intranda-internal</id>
 			<url>https://nexus.intranda.com/repository/maven-internal</url>
