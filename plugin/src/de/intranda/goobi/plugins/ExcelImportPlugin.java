@@ -376,7 +376,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
 
                 // now start the first automatic step
                 for (Step s : process.getSchritte()) {
-                    if (s.getBearbeitungsstatusEnum().equals(StepStatus.OPEN) && s.isTypAutomatisch()) {
+                    if (StepStatus.OPEN.equals(s.getBearbeitungsstatusEnum()) && s.isTypAutomatisch()) {
                         ScriptThreadWithoutHibernate myThread = new ScriptThreadWithoutHibernate(s);
                         myThread.start();
                     }
@@ -501,7 +501,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
      */
     private List<Process> initTemplateList() {
         String sql = FilterHelper.criteriaBuilder("", true, null, null, null, true, false);
-        List<Process> templates = ProcessManager.getProcesses(null, sql);
+        List<Process> templates = ProcessManager.getProcesses(null, sql, null);
         this.templateList = templates;
         initTemplateNames();
         return templates;
@@ -602,13 +602,13 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
         }
         if (!processErrors.isEmpty()) {
             // ProcessManager.saveProcess(p);
-            String processlog = "Validation issues during in depth data analysis: " + "<br/>";
-            processlog += "<ul>";
+            StringBuilder processlog = new StringBuilder("Validation issues during in depth data analysis: ").append("<br/>");
+            processlog.append("<ul>");
             for (String s : processErrors) {
-                processlog += "<li>" + s + "</li>";
+                processlog.append("<li>").append(s).append("</li>");
             }
-            processlog += "</ul>";
-            Helper.addMessageToProcessLog(processCopy.getId(), LogType.DEBUG, processlog);
+            processlog.append("</ul>");
+            Helper.addMessageToProcessLog(processCopy.getId(), LogType.DEBUG, processlog.toString());
         }
     }
 
@@ -956,7 +956,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
         if (value == null) {
             return null;
         }
-        value = value.replaceAll("¶", "<br/><br/>");
+        value = value.replace("¶", "<br/><br/>");
         value = value.replaceAll("\\u00A0|\\u2007|\\u202F", " ").trim();
         datum.setValue(value);
         // check if value is empty but required
@@ -1125,7 +1125,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
         if (StringUtils.isBlank(value)) {
             return;
         }
-        value = value.replaceAll("¶", "<br/><br/>");
+        value = value.replace("¶", "<br/><br/>");
         value = value.replaceAll("\\u00A0|\\u2007|\\u202F", " ").trim();
 
         String identifier = null;
@@ -1152,7 +1152,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
                         }
                     }
                 } else {
-                    if (mmo.getRulesetName().equals("DateOfOrigin") && value.contains("/")) {
+                    if ("DateOfOrigin".equals(mmo.getRulesetName()) && value.contains("/")) {
                         String[] splitDate = value.split("/");
                         Metadata mdStart = new Metadata(prefs.getMetadataTypeByName("DateStart"));
                         Metadata mdEnd = new Metadata(prefs.getMetadataTypeByName("DateEnd"));
@@ -1173,8 +1173,8 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
                     }
                     Metadata md = new Metadata(prefs.getMetadataTypeByName(mmo.getRulesetName()));
                     // check if CatalogIDDigital has any disallowed characters, if so replace them with _
-                    if (mmo.getRulesetName().equals("CatalogIDDigital")) {
-                        value = value.replaceAll(" ", "-");
+                    if ("CatalogIDDigital".equals(mmo.getRulesetName())) {
+                        value = value.replace(' ', '-');
                     }
                     // all other Metadata are added here
                     md.setValue(value);
