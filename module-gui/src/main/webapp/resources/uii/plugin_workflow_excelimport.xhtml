@@ -1,4 +1,13 @@
-<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:ui="http://xmlns.jcp.org/jsf/facelets" xmlns:composite="http://xmlns.jcp.org/jsf/composite" xmlns:h="http://xmlns.jcp.org/jsf/html" xmlns:f="http://xmlns.jcp.org/jsf/core" xmlns:x="http://myfaces.apache.org/tomahawk" xmlns:intranda="http://xmlns.jcp.org/jsf/composite/composites" xmlns:pt="http://xmlns.jcp.org/jsf/passthrough" xmlns:p="http://primefaces.org/ui">
+<ui:composition
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:composite="http://xmlns.jcp.org/jsf/composite"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:x="http://myfaces.apache.org/tomahawk"
+	xmlns:intranda="http://xmlns.jcp.org/jsf/composite/compositesPG"
+	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+	xmlns:p="http://primefaces.org/ui">
 
     <composite:interface>
     </composite:interface>
@@ -7,15 +16,15 @@
 		<link rel="stylesheet" href="css/excel_import.css"></link>
 
 
-        <h:outputText styleClass="alert alert-danger block margin-top-most" value="#{msgs.noAccessAllowed} Plugin_Goobi_Workflow_ExcelImport" 
+        <h:outputText styleClass="alert alert-danger block margin-top-most" value="#{msgs.noAccessAllowed} Plugin_Goobi_Workflow_ExcelImport"
         	rendered="#{!LoginForm.hasRole('Plugin_Goobi_Workflow_ExcelImport')}"/>
-        
+
         <h:panelGroup rendered="#{LoginForm.hasRole('Plugin_Goobi_Workflow_ExcelImport')}">
 			<div class="row">
 				<div class="col-sm-12">
 					<!--  list of all rows in uploaded excelfile -->
 					<div class="row">
-					
+
 						<h:panelGroup id="actionform"  styleClass="col-xs-7" >
 							<div class="box box-color box-bordered lightgrey" >
 								<h:form>
@@ -23,7 +32,7 @@
 										<h3>
 											<h:outputText value="#{msgs.plugin_yerushaExcelImport_validationResults}" />
 										</h3>
-										
+
 										<div class="actions">
 											<h:commandLink styleClass="btn btn-mini" action="#{NavigationForm.Reload}"
 												title="#{NavigationForm.uiStatus.workflow_excel_import eq 'up'?msgs.showBoxDetailsOn:msgs.showBoxDetailsOff}">
@@ -35,26 +44,26 @@
 									</div>
 								</h:form>
 								<div class="box-content">
-								
+
 									<h:outputText styleClass="alert alert-warning margin-top-10" style="display:block;text-align:center"
-										value="#{msgs.plugin_yerushaExcelImport_noValidation}" 
+										value="#{msgs.plugin_yerushaExcelImport_noValidation}"
 										rendered="#{NavigationForm.workflowPlugin.rowList == null}" />
-									
+
 									<ui:repeat var="row" value="#{NavigationForm.workflowPlugin.rowList}">
-					 					
+
 					 					<h4>#{row.rowIdentifier}</h4>
-					 					
+
 					 					<table class="table table-hover table-nomargin dataTable table-bordered responsive table-border-right" style="margin-bottom:15px;">
 					 						<ui:repeat var="metadatum" value="#{row.contentList}">
-						 						
+
 						 						<ui:fragment rendered="#{NavigationForm.uiStatus.workflow_excel_import eq 'down' or !metadatum.valid}" >
 						 							<tr>
 							 							<td class="tableColumnOverflow width200">
-							 								
+
 							 								<h:outputText styleClass="#{metadatum.value==''?'font-light':'font-black'}"
 							 									value="#{metadatum.headername}:" rendered="#{metadatum.valid}"/>
-															
-									                       	
+
+
 									                       	<h:outputText rendered="#{!metadatum.valid}"
 							 									styleClass="font-danger"
 							 									value="#{metadatum.headername}:">
@@ -65,14 +74,14 @@
 									                            <f:passThroughAttribute name="data-html" value="true" />
 																<f:passThroughAttribute name="data-content" value="&lt;b class='font-status-error'&gt;#{msgs.plugin_yerushaExcelImport_validationError}:&lt;/b&gt;&lt;br/&gt;#{metadatum.errorMessagesAsHtml}" />
 									                       	</h:outputText>
-									                       	
-						                                        	 									
+
+
 							 							</td>
 							 							<td>
-							 							
+
 							 								<h:outputText styleClass="#{metadatum.value==''?'font-light':'font-black'}"
 							 									value="#{metadatum.value==''?'- empty field -':metadatum.value}" rendered="#{metadatum.valid}"/>
-															
+
 									                       	<h:outputText rendered="#{!metadatum.valid}"
 							 									styleClass="font-danger"
 							 									value="#{metadatum.value==''?'- empty field -':metadatum.value}">
@@ -83,17 +92,17 @@
 									                            <f:passThroughAttribute name="data-html" value="true" />
 																<f:passThroughAttribute name="data-content" value="&lt;b class='font-status-error'&gt;#{msgs.plugin_yerushaExcelImport_validationError}:&lt;/b&gt;&lt;br/&gt;#{metadatum.errorMessagesAsHtml}" />
 									                       	</h:outputText>
-									                    
+
 							 							</td>
 							 						</tr>
 						 						</ui:fragment>
-					 						</ui:repeat>	
+					 						</ui:repeat>
 					 					</table>
-					 					
+
 									</ui:repeat>
-									
+
 								</div>
-							</div>	
+							</div>
 						</h:panelGroup>
 						<h:panelGroup class="col-xs-5">
 							<div class="box box-color box-bordered orange">
@@ -112,85 +121,85 @@
 											 	<p:fileUpload fileUploadListener="#{NavigationForm.workflowPlugin.uploadFile}" id="upload" auto="true"
 													style="text-align:center;" mode="advanced" multiple="true" dragDropSupport="true"
 													label="#{msgs.plugin_massupload_selectFiles}" sizeLimit="1000000000000"
-													allowTypes="#{NavigationForm.workflowPlugin.allowedTypes}" 
-													oncomplete="if(this.files.length == 0) popoverUpdate()" 
+													allowTypes="#{NavigationForm.workflowPlugin.allowedTypes}"
+													oncomplete="if(this.files.length == 0) popoverUpdate()"
 													update=":actionform :processParameters"/>
 											</h:form>
 										</div>
 									</div>
-									
+
 
 									<h:panelGroup  id="processParameters" styleClass="progress-parameters">
 										<ui:fragment  rendered="#{NavigationForm.workflowPlugin.rowList.size() > 0}" >
 											<h:form styleClass="form-horizontal form-bordered" id="processparametersForm">
-											
-													<intranda:formInputDropDownAjax 
-														id="workflow" 
-														label="#{msgs.plugin_yerushaExcelImport_workflow}" 
-														field="#{NavigationForm.workflowPlugin.templateName}" 
-														help="#{msgs.plugin_yerushaExcelImport_workflow_help}" 
-														name="prioritaet" 
-														selectItems="#{NavigationForm.workflowPlugin.templateNames}" 
-														fieldStyle="form-control" 
-														required="true" 
-														ajaxEvent="change" 
+
+													<intranda:formInputDropDownAjax
+														id="workflow"
+														label="#{msgs.plugin_yerushaExcelImport_workflow}"
+														field="#{NavigationForm.workflowPlugin.templateName}"
+														help="#{msgs.plugin_yerushaExcelImport_workflow_help}"
+														name="prioritaet"
+														selectItems="#{NavigationForm.workflowPlugin.templateNames}"
+														fieldStyle="form-control"
+														required="true"
+														ajaxEvent="change"
 														ajaxRender="processparametersForm:responsibleEditor_wrap processparametersForm:manualChecking_wrap"
-														var="process" 
-														itemLabel="#{process}" 
+														var="process"
+														itemLabel="#{process}"
 														itemValue="#{process}"
 														classLeft="col-xs-5"
 														classRight="col-xs-7"/>
-											
+
 													<h:panelGroup id="manualChecking_wrap" display="block">
- 														<ui:fragment rendered="#{NavigationForm.workflowPlugin.templateHasQaStep()}" > 
-															<intranda:formInputCheckBoxAjax 
+ 														<ui:fragment rendered="#{NavigationForm.workflowPlugin.templateHasQaStep()}" >
+															<intranda:formInputCheckBoxAjax
 																id="manualChecking"
-																label="#{msgs.plugin_yerushaExcelImport_manualMetadata}" 
-																field="#{NavigationForm.workflowPlugin.manualCorrection}" 
-																help="#{msgs.plugin_yerushaExcelImport_manualMetadata_help}" 
-																name="metadata" 
-																ajaxEvent="change" 
+																label="#{msgs.plugin_yerushaExcelImport_manualMetadata}"
+																field="#{NavigationForm.workflowPlugin.manualCorrection}"
+																help="#{msgs.plugin_yerushaExcelImport_manualMetadata_help}"
+																name="metadata"
+																ajaxEvent="change"
 																ajaxRender="processparametersForm:responsibleEditor_wrap"
 																classLeft="col-xs-5"
 																classRight="col-xs-7"/>
 														</ui:fragment>
 													</h:panelGroup>
-														
+
 													<h:panelGroup id="responsibleEditor_wrap" display="block">
- 														<ui:fragment rendered="#{NavigationForm.workflowPlugin.manualCorrection}" > 
- 															<ui:fragment rendered="#{NavigationForm.workflowPlugin.templateHasQaStep()}" > 
- 														
-																<intranda:formInputDropDownAjax 
-																	id="responsibleEditor" 
-																	label="#{msgs.plugin_yerushaExcelImport_responsbleEditor}" 
-																	field="#{NavigationForm.workflowPlugin.userName}" 
-																	help="#{msgs.plugin_yerushaExcelImport_responsbleEditor_help}" 
-																	name="prioritaet" 
-																	selectItems="#{NavigationForm.workflowPlugin.userNames}" 
-																	fieldStyle="form-control" 
-																	required="true" 
+ 														<ui:fragment rendered="#{NavigationForm.workflowPlugin.manualCorrection}" >
+ 															<ui:fragment rendered="#{NavigationForm.workflowPlugin.templateHasQaStep()}" >
+
+																<intranda:formInputDropDownAjax
+																	id="responsibleEditor"
+																	label="#{msgs.plugin_yerushaExcelImport_responsbleEditor}"
+																	field="#{NavigationForm.workflowPlugin.userName}"
+																	help="#{msgs.plugin_yerushaExcelImport_responsbleEditor_help}"
+																	name="prioritaet"
+																	selectItems="#{NavigationForm.workflowPlugin.userNames}"
+																	fieldStyle="form-control"
+																	required="true"
 																	ajaxEvent="change"
 																	ajaxRender="none"
 																	var="process"
-																	itemLabel="#{process}" 
+																	itemLabel="#{process}"
 																	itemValue="#{process}"
 																	classLeft="col-xs-5"
 																	classRight="col-xs-7"/>
 															</ui:fragment>
 														</ui:fragment>
 													</h:panelGroup>
-													
-													<intranda:formInputText 
-														id="batchName" 
-														name="titel2" 
-														label="#{msgs.plugin_yerushaExcelImport_batchName}" 
-														field="#{NavigationForm.workflowPlugin.batchName}" 
-														help="#{msgs.plugin_yerushaExcelImport_batchName_help}" 
-														fieldStyle="form-control" 
-														required="false" 
+
+													<intranda:formInputText
+														id="batchName"
+														name="titel2"
+														label="#{msgs.plugin_yerushaExcelImport_batchName}"
+														field="#{NavigationForm.workflowPlugin.batchName}"
+														help="#{msgs.plugin_yerushaExcelImport_batchName_help}"
+														fieldStyle="form-control"
+														required="false"
 														classLeft="col-xs-5"
 														classRight="col-xs-7"/>
-														
+
 													<div class="row">
 														<div class="col-xs-5" style="padding-top: 0px;">
 															<h:outputText styleClass="alert #{NavigationForm.workflowPlugin.numberInvalidFields > 0?'alert-danger':'alert-info'} margin-top-10"
@@ -211,7 +220,7 @@
 									</h:panelGroup>
 								</div>
 							</div>
-							
+
 							<h:panelGroup id="processCreationResult">
 								<h:messages id="workflowExcelImportProcessCreationMessage" escape="false" errorClass="alert alert-danger" infoClass="alert alert-info" warnClass="alert" styleClass="messages" />
 							</h:panelGroup>
@@ -226,7 +235,7 @@
 				$('[data-toggle="popover"]').popover();
 			}
 		</script>
-		
+
     </composite:implementation>
 
 </ui:composition>
