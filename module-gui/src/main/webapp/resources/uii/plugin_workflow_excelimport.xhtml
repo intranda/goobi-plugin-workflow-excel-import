@@ -28,7 +28,9 @@
 						boxTitle="false">
 						<intranda:boxTitle
 							icon="fa fa-tasks"
-							title="#{msgs.plugin_yerushaExcelImport_validationResults}">
+							title="
+								#{msgs.plugin_yerushaExcelImport_validationResults}#{NavigationForm.workflowPlugin.numberInvalidFields > 0 ? ': ' :''}
+								#{NavigationForm.workflowPlugin.numberInvalidFields > 0 ? NavigationForm.workflowPlugin.invalidFields : ''}">
 							<h:form>
 								<div class="actions">
 									<h:commandLink styleClass="btn btn-mini" action="#{NavigationForm.Reload}"
@@ -182,14 +184,6 @@
 										fieldStyle="form-control"
 										required="false" />
 									<div class="box__actions">
-										<div class="me-auto">
-											<!-- <h:outputText
-												styleClass="alert #{NavigationForm.workflowPlugin.numberInvalidFields > 0?'alert-danger':'alert-info'} margin-top-10"
-												style="display:block;"
-												value="#{NavigationForm.workflowPlugin.invalidFields}" /> -->
-											<h:outputText
-												value="#{NavigationForm.workflowPlugin.invalidFields}" />
-										</div>
 										<h:commandButton
 											type="button"
 											class="btn btn-blank"
