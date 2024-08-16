@@ -1,12 +1,12 @@
-			#upload .ui-widget-content {
+			#uploadArea\:upload .ui-widget-content {
 				border: none;
 			}
-			
-			#upload .ui-widget-header {
+
+			#uploadArea\:upload .ui-widget-header {
 			    background: #fff none repeat scroll 0 0;
 			}
-			
-			#upload .ui-fileupload-choose {
+
+			#uploadArea\:upload .ui-fileupload-choose {
 			    background: #368ee0 none repeat scroll 0 0;
 			    color: #fff;
 			    text-shadow: none;
@@ -14,39 +14,30 @@
 			    padding: 0.3em 1em;
 			    font-weight: 400;
 			}
-			
-			#upload .ui-fileupload-buttonbar span.ui-button .ui-button-text {
+
+			#uploadArea\:upload .ui-fileupload-buttonbar span.ui-button .ui-button-text {
 			    padding: 0.3em 1em;
 			}
-			
-			#upload .ui-fileupload-buttonbar span.ui-button span.ui-button-icon-left {
+
+			#uploadArea\:upload .ui-fileupload-buttonbar span.ui-button span.ui-button-icon-left {
 			    display: none;
 			}
-			
-			#upload .ui-fileupload-files {
+
+			#uploadArea\:upload .ui-fileupload-files {
 			    width: 100%;
 			}
-			
-			.ui-fileupload-content .ui-progressbar {
+
+			#uploadArea\:upload .ui-fileupload-content .ui-progressbar {
 			    width: 100px;
 			    height: 20px;
 			    margin: 0px;
 			}
 
-			#upload .ui-fileupload-files td:first-child {
+			#uploadArea\:upload .ui-fileupload-files td:first-child {
 			    display: none;
 			}
-			
-			.draganddroparea {
-				border: 2px dashed silver;
-				padding-top:20px;
-				
-			}
-			
-			.bg-gray{
-				background-color: #ccc;
-			}
-			
+
+
 			.col-xs-5 .box-content .row{
 				padding-top: 15px;
 				padding-bottom: 23px;
@@ -54,37 +45,26 @@
 				padding-right: 15px;
 				text-align: center;
 			}
-			
+
 			.col-xs-5 .box-content .row .btn{
 				float:right;
 			}
-			
+
 			.col-xs-5 .box-content .row .col-xs-5{
 				padding-top: 11px;
 			}
-			
+
 			.progress-parameters .form-horizontal.form-bordered .form-group:nth-child(2) {
 				border-top: 1px solid #ddd;
 			}
 			.progress-parameters .form-horizontal.form-bordered span .form-group:first-child {
 				border-top: 0;
-			}										
+			}
 			.progress-parameters .form-horizontal.form-bordered span .form-group:last-child {
 				border-bottom: 1px solid #ddd;
 			}
-			
-			.popoverValidationList { 
-				list-style: none;
-				margin-left: 0px;
-				padding-left: 0px
+
+			.popoverValidationList {
+				list-style-type: '\25b8  ';
+				padding-left: 0.75em;
 			}
-			/*
-			.popoverValidationList li { 
-			  	background-color: #5D8F99;
-			}
-			*/
-			.popoverValidationList li::before {
-    			content: '\25b8';
-    			padding-right: 1em;
-    			padding-left:0px;
-    		}
