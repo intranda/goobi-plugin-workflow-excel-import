@@ -3,7 +3,7 @@
 		<exec executable="mvn">
 			<arg value="package"/>
 		</exec>
-		<copy file="module-main/target/plugin_intranda_workflow_excelimport.jar" todir="/opt/digiverso/goobi/plugins/workflow/"/>
-		<copy file="module-gui/target/plugin_intranda_workflow_excelimport-GUI.jar" todir="/opt/digiverso/goobi/plugins/GUI/"/>
+		<copy file="module-base/target/plugin-workflow-excel-import-base.jar" todir="/opt/digiverso/goobi/plugins/workflow/"/>
+		<copy file="module-gui/target/plugin-workflow-excel-import-gui.jar" todir="/opt/digiverso/goobi/plugins/GUI/"/>
 	</target>
 </project>
