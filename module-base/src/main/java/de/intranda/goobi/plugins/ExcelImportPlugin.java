@@ -410,8 +410,8 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
         for (User u : step.getBenutzer()) {
             StepManager.removeUserFromStep(step, u);
         }
-        step.setBenutzer(new ArrayList<User>());
-        step.setBenutzergruppen(new ArrayList<Usergroup>());
+        step.setBenutzer(new ArrayList<>());
+        step.setBenutzergruppen(new ArrayList<>());
         // add back only the configured user
         step.getBenutzer().add(assignedUser.getUser());
         StepManager.saveStep(step);
@@ -569,8 +569,6 @@ public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
         processCopy.setDocket(processTemplate.getDocket());
         // copy from template
         this.bHelper.SchritteKopieren(processTemplate, processCopy);
-        this.bHelper.ScanvorlagenKopieren(processTemplate, processCopy);
-        this.bHelper.WerkstueckeKopieren(processTemplate, processCopy);
         this.bHelper.EigenschaftenKopieren(processTemplate, processCopy);
 
         ProcessManager.saveProcess(processCopy);
