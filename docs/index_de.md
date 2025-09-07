@@ -3,6 +3,10 @@ title: Generisches Import Plugin für Excel-Dateien inklusive Validierung
 identifier: intranda_workflow_excelimport
 description: Dieses Workflow-Plugin erlaubt den Massenimport von Daten aus Excel-Dateien samt Anzeige von Validierungsmeldungen.
 published: true
+keywords:
+    - Goobi workflow
+    - Plugin
+    - Workflow Plugin
 ---
 ## Einführung
 Dieses Workflow-Plugin wurde implementiert, um neben der reinen Importroutine ebenfalls eine individuelle Nutzeroberfläche zur Verfügung stellen zu können, die eine umfangreiche Rückmeldung über die Validierung der der Inhalte gibt, bevor diese tatsächlich importiert werden.
