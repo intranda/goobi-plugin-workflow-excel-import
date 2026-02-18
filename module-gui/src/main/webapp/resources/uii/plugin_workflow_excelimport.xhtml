@@ -6,7 +6,8 @@
 	xmlns:f="http://xmlns.jcp.org/jsf/core"
 	xmlns:intranda="http://xmlns.jcp.org/jsf/composite/composites"
 	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
-	xmlns:p="http://primefaces.org/ui">
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:util="http://goobi.io/util">
     <composite:interface>
     </composite:interface>
     <composite:implementation>
@@ -28,7 +29,7 @@
 						boxType="neutral"
 						boxTitle="false">
 						<intranda:boxTitle
-							icon="fa fa-tasks"
+							icon="list-check"
 							title="
 								#{msgs.plugin_yerushaExcelImport_validationResults}#{NavigationForm.workflowPlugin.numberInvalidFields > 0 ? ': ' :''}
 								#{NavigationForm.workflowPlugin.numberInvalidFields > 0 ? NavigationForm.workflowPlugin.invalidFields : ''}">
@@ -36,7 +37,7 @@
 								<div class="actions">
 									<h:commandLink styleClass="btn btn-mini" action="#{NavigationForm.Reload}"
 										title="#{NavigationForm.uiStatus.workflow_excel_import eq 'up'?msgs.showBoxDetailsOn:msgs.showBoxDetailsOff}">
-										<i class="fa #{NavigationForm.uiStatus.workflow_excel_import eq 'down'?'fa-angle-up':'fa-angle-down'}" />
+										<util:icon icon="#{NavigationForm.uiStatus.workflow_excel_import eq 'down'?'chevron-up':'chevron-down'}" />
 										<f:setPropertyActionListener target="#{NavigationForm.uiStatus.workflow_excel_import}"
 											value="#{NavigationForm.uiStatus.workflow_excel_import eq 'down'?'up':'down'}" />
 									</h:commandLink>
@@ -100,7 +101,7 @@
 						boxForm="true"
 						boxPadding="false"
 						boxType="primary"
-						icon="fa fa-upload"
+						icon="upload"
 						id="uploadArea"
 						title="#{msgs.plugin_yerushaExcelImport_uploadArea}">
 						<div class="form-row">
@@ -199,10 +200,7 @@
 											type="button"
 											class="btn btn-primary"
 											action="#{NavigationForm.workflowPlugin.startImport()}">
-											<span class="fa fa-plus" />
-											<span>
-												#{msgs.plugin_yerushaExcelImport_createProcesses}
-											</span>
+											<util:icon-text icon="plus" text="#{msgs.plugin_yerushaExcelImport_createProcesses}" />
 											<f:ajax render=":processCreationResult" execute="@this batchName"/>
 										</h:commandLink>
 									</div>
