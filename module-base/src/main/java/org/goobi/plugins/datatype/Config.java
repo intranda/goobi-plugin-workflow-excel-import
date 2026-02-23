@@ -39,7 +39,6 @@ public class Config {
      * @param xmlConfig
      */
 
-    @SuppressWarnings("unchecked")
     public Config(SubnodeConfiguration xmlConfig) {
 
         publicationType = xmlConfig.getString("/publicationType", "Monograph");

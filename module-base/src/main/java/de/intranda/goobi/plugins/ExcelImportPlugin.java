@@ -50,7 +50,6 @@ import org.goobi.production.flow.statistics.hibernate.FilterHelper;
 import org.goobi.production.importer.Record;
 import org.goobi.production.plugin.PluginLoader;
 import org.goobi.production.plugin.interfaces.IOpacPlugin;
-import org.goobi.production.plugin.interfaces.IPlugin;
 import org.goobi.production.plugin.interfaces.IWorkflowPlugin;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.model.file.UploadedFile;
@@ -90,7 +89,7 @@ import ugh.fileformats.mets.MetsMods;
 @PluginImplementation
 @Log4j
 @Data
-public class ExcelImportPlugin implements IWorkflowPlugin, IPlugin {
+public class ExcelImportPlugin implements IWorkflowPlugin {
 
     private String title = "intranda_workflow_excelimport";
     private PluginType type = PluginType.Workflow;
