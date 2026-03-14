@@ -9,7 +9,7 @@ keywords:
     - Workflow Plugin
 ---
 ## Einführung
-Dieses Workflow-Plugin wurde implementiert, um neben der reinen Importroutine ebenfalls eine individuelle Nutzeroberfläche zur Verfügung stellen zu können, die eine umfangreiche Rückmeldung über die Validierung der der Inhalte gibt, bevor diese tatsächlich importiert werden.
+Dieses Workflow-Plugin wurde implementiert, um neben der reinen Importroutine ebenfalls eine individuelle Nutzeroberfläche zur Verfügung stellen zu können, die eine umfangreiche Rückmeldung über die Validierung der Inhalte gibt, bevor diese tatsächlich importiert werden.
 
 
 ## Installation
@@ -111,7 +111,7 @@ Der Inhalt der Konfigurationsdatei sieht wie folgt aus:
 
 
 ## Überblick und Funktionsweise
-Nach der Installation und Inbetriebnahme des Plugins, steht dieses innerhalb des Menüs `Workflow` zur Verfügung. Nach dem Aufruf kann hier hier eine Excel-Datei hochgeladen werden, so dass anschließend alle Validierungsmeldungen sofort ersichtlich werden. Im Anschluß daran, kann entschieden werden, ob die Vorgänge trotz eventueller Validierungsmeldungen dennoch in Goobi erzeugt werden sollen, oder ob der Import abgebrochen werden soll.
+Nach der Installation und Inbetriebnahme des Plugins, steht dieses innerhalb des Menüs `Workflow` zur Verfügung. Nach dem Aufruf kann hier eine Excel-Datei hochgeladen werden, so dass anschließend alle Validierungsmeldungen sofort ersichtlich werden. Im Anschluß daran, kann entschieden werden, ob die Vorgänge trotz eventueller Validierungsmeldungen dennoch in Goobi erzeugt werden sollen, oder ob der Import abgebrochen werden soll.
 
 ![](screen1.png)
 

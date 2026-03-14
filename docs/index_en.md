@@ -62,7 +62,7 @@ The content of the configuration file looks like this:
 
         Additionally it is possible to configure specific error messages for every validation criterion which are then displayed as a Mouse over Text in the validation area for any fields that failed a validation:
             - requiredErrorMessage: displayed if cell has no content despite being "required
-            - patternErrorMessage: dispayed if cell contents do not match provided regex "pattern"
+            - patternErrorMessage: displayed if cell contents do not match provided regex "pattern"
             - listErrorMessage: displayed if cell contents are not in provided "list"
             - eitherErrorMessage: displayed if neither this cell or the one configured as "either" have content
             - requiredFieldsErrorMessage: displayed if a cell had contents despite at least one of the ones listed as "requiredFields" being empty
