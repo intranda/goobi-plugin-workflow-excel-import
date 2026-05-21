@@ -72,7 +72,7 @@ import de.sub.goobi.persistence.managers.StepManager;
 import de.unigoettingen.sub.search.opac.ConfigOpac;
 import de.unigoettingen.sub.search.opac.ConfigOpacCatalogue;
 import lombok.Data;
-import lombok.extern.log4j.Log4j;
+import lombok.extern.log4j.Log4j2;
 import net.xeoh.plugins.base.annotations.PluginImplementation;
 import ugh.dl.DigitalDocument;
 import ugh.dl.DocStruct;
@@ -87,10 +87,11 @@ import ugh.exceptions.WriteException;
 import ugh.fileformats.mets.MetsMods;
 
 @PluginImplementation
-@Log4j
+@Log4j2
 @Data
 public class ExcelImportPlugin implements IWorkflowPlugin {
 
+    private static final long serialVersionUID = 6997030054791862400L;
     private String title = "intranda_workflow_excelimport";
     private PluginType type = PluginType.Workflow;
     private String gui = "/uii/plugin_workflow_excelimport.xhtml";
@@ -99,8 +100,7 @@ public class ExcelImportPlugin implements IWorkflowPlugin {
     private String filenamePart;
     private String userFolderName;
     private String filenameSeparator;
-    // private String processnamePart;
-    // private String processnameSeparator;
+
     private List<String> stepTitles;
     private List<MassUploadedFile> uploadedFiles = new ArrayList<>();
     private User user;
@@ -636,8 +636,16 @@ public class ExcelImportPlugin implements IWorkflowPlugin {
                 }
             }
         }
+        // sanitize path, remove any ../
+        fileName = Path.of(fileName).getFileName().toString();
 
-        try (OutputStream out = Files.newOutputStream(tempFolder.resolve(fileName))) {
+        // symlink handling
+        Path tmpFile = tempFolder.resolve(fileName);
+        if (!tmpFile.normalize().startsWith(tempFolder)) {
+            throw new IOException("Invalid filename");
+        }
+
+        try (OutputStream out = Files.newOutputStream(tmpFile)) {
             int read = 0;
             byte[] bytes = new byte[1024];
             while ((read = in.read(bytes)) != -1) {
