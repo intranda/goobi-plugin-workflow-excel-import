@@ -12,12 +12,7 @@
     </composite:interface>
     <composite:implementation>
 		<link rel="stylesheet" href="css/excel_import.css"></link>
-        <h:panelGroup
-			layout="block"
-			styleClass="alert alert-danger"
-        	rendered="#{!LoginForm.hasRole('Plugin_Goobi_Workflow_ExcelImport')}">
-			#{msgs.noAccessAllowed} Plugin_Goobi_Workflow_ExcelImport
-		</h:panelGroup>
+        <util:missing-rights rights="Plugin_Goobi_Workflow_ExcelImport" rendered="true" />
         <h:panelGroup rendered="#{LoginForm.hasRole('Plugin_Goobi_Workflow_ExcelImport')}">
 			<div class="row">
 				<!--  list of all rows in uploaded excelfile -->
