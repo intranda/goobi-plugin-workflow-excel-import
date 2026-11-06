@@ -139,9 +139,9 @@
 										required="true"
 										ajaxEvent="change"
 										ajaxRender="processparametersForm:responsibleEditor_wrap processparametersForm:manualChecking_wrap"
-										var="process"
-										itemLabel="#{process}"
-										itemValue="#{process}" />
+										var="var"
+										itemLabel="#{var}"
+										itemValue="#{var}" />
 									<h:panelGroup id="manualChecking_wrap" display="block">
 										<ui:fragment rendered="#{NavigationForm.workflowPlugin.templateHasQaStep()}" >
 											<intranda:formInputCheckBoxAjax
@@ -168,9 +168,9 @@
 													required="true"
 													ajaxEvent="change"
 													ajaxRender="none"
-													var="process"
-													itemLabel="#{process}"
-													itemValue="#{process}" />
+													var="var"
+													itemLabel="#{var}"
+													itemValue="#{var}" />
 											</ui:fragment>
 										</ui:fragment>
 									</h:panelGroup>
